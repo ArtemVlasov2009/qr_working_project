@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Сторінка історії генерацій{% endblock %}</title>
+        {% block link %}
+            <link rel="stylesheet" href="{% static 'css/history_gen.css' %}"> 
+            <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+        {% endblock %}
+    </head>
+    <body>
+        {% block content %}
+        <header class="header_main">
+            <a href="{% url 'home' %}">
+                <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+            </a>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+            <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Генерація коду</a>
+            <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+        </header>
+        <div>
+            <div class="Header_Frame">
+                <p>Історія ваших генерацій</p>
+                {% comment %} <button>Пошук</button> {% endcomment %}
+            </div> 
+            <div class="Frame">
+                <div class="QR_Container">
+                    <div class="QR_Item">
+                        <img src="{% static 'images/qr_example1.png' %}" alt="Example 1">
+                        <p>Example 1</p>
+                    </div>
+                    <div class="QR_Item">
+                        <img src="{% static 'images/qr_example2.png' %}" alt="Example 2">
+                        <p>Example 2</p>
+                    </div>
+                    <div class="QR_Item">
+                        <img src="{% static 'images/qr_example3.png' %}" alt="Example 3">
+                        <p>Example 3</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+    </body>    
+</html>

@@ -1,0 +1,46 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сторінка історії генерацій{% endblock %}</title>
+    {% block link %}
+        <link rel="stylesheet" href="{% static 'css/contacts.css' %}">
+        <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <header class="header_main">
+        <a href="{% url 'home' %}">
+            <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+        </a>
+        <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Генерація коду</a>
+        <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+    </header>
+    <div>
+        <div class="Header_Frame">
+            {% comment %} <p>Контакти</p> {% endcomment %}
+            <div>
+                <div class="Frame_Info">
+                    <p class="Frame_Text">
+                        Адреса: вул. Технологічна, 15, м. Київ, Україна, 01001<br>
+                        Телефон: +38 (044) 123-45-67<br>
+                        Email: support@qrgenservice.com<br>
+                        Графік роботи: Понеділок - П’ятниця: 09:00 - 18:00<br>
+                        Субота - Неділя: вихідний<br>
+                        Соціальні мережі:<br>
+                        Facebook: facebook.com/qrgenservice<br>
+                        Instagram: instagram.com/qrgenservice<br>
+                        Twitter: twitter.com/qrgenservice<br>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

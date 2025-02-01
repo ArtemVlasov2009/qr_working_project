@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сторінка генерації</title>
+    <link rel="stylesheet" href="{% static 'css/generator.css' %}">
+    <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+</head>
+<body>
+    <header class="header_main">
+        <a class='home_url' href="{% url 'home' %}">
+            <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+        </a>
+        <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Кодогенерація</a>
+        <a href="{% url 'history_generations' %}" class="{% if request.path == '/history_generations/' %}current-page{% endif %}">Генерації</a>
+        <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+        <div class="logout">
+            <a class="logout_knopка" href="{% url 'logout' %}">Вийти: {{ request.user.username }}</a>
+        </div>
+    </header>
+    <div class="Generator_frame">
+        <div class="Generator_header">
+            <p>Згенеруйте ваш QR code</p>
+        </div>
+        <div class="Generator_internal_frame">
+            <form method="POST">
+                {% csrf_token %}
+                <label for="name">Имя:</label>
+                <input type="text" id="name" name="name"><br><br>
+                <label for="link_or_text">Посилання або текст:</label>
+                <input type="text" id="link_or_text" name="link_or_text"><br><br>
+                <button class="Buttom_Down" type="submit">Генирувати</button>
+            </form>
+
+            <div class="qr-code-container">
+                {% if qr_image_url %}
+                    <h2>Ваш QR-код:</h2>
+                    <img src="{{ qr_image_url }}" alt="QR-код">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>    
+</html>

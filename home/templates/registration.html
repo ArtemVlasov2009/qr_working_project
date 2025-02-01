@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сторінка реєстрації{% endblock %}</title>
+    {% block link %}
+        <link rel="stylesheet" href="{% static 'css/registration.css' %}">
+        <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <header class="header_main">
+        <a href="{% url 'home' %}">
+            <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+        </a>
+        <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+        <a href="{% url 'registration' %}" class="{% if request.path == '/registration/' %}current-page{% endif %}">Реєстрація</a>
+        <a href="{% url 'authorization' %}" class="{% if request.path == '/authorization/' %}current-page{% endif %}">Авторизація</a>
+        <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+    </header>
+    <div class="registration-container">
+        <h1>Реєстрація</h1>
+        <form method="POST" action="{% url 'registration' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Ім'я користувача:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Підтвердження пароля:</label>
+                <input type="password" id="confirm-password" name="confirm_password" required> 
+            </div>
+            {% if show_text_passwords_dont_match %}
+                <p class="Password_Dont_match">Паролі не співпадають</p>
+            {% endif %}
+            {% if show_text_not_unique_name %}
+                <p class="name_not_unique">Такий користувач вже існує</p>
+            {% endif %}
+            <p class="Have_reg">Вже зареєстрований? <a class = "Auth_reg_btn" href="{% url 'authorization' %}">Авторизуйтесь</a></p>
+            <button type="submit" class="register-btn">Зареєструватися</button>
+        </form>
+    </div>
+    {% endblock %}
+</body>
+</html>

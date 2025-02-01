@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сторінка авторизації{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/authorization.css' %}">
+    <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+</head>
+<body>
+    {% block content %}
+    <header class="header_main">
+        <a class = 'home_url' href="{% url 'home' %}">
+            <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo">
+        </a>
+        <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}current-page{% endif %}">Головна</a>
+        <a href="{% url 'registration' %}" class="{% if request.resolver_match.url_name == 'registration' %}current-page{% endif %}">Реєстрація</a>
+        <a href="{% url 'authorization' %}" class="{% if request.resolver_match.url_name == 'authorization' %}current-page{% endif %}">Авторизація</a>
+        <a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}current-page{% endif %}">Контакти</a>
+    </header>
+    <div class="registration-container">
+        <h1>Авторизація</h1>
+        <form method="POST" action="{% url 'authorization' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Ім'я користувача:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="email-confirm">Підтвердження через Email:</label>
+                <input type="email" id="email-confirm" name="email-confirm" required>
+                {% if user == None %}
+                <p class = "Proverka_login_password">Логін або пароль некоректні</p>
+                {% endif %}
+            </div>
+            <p class = "Not_reg">Не маєте аккаунта? <a class = "reg_reg_btn" href="{% url 'registration' %}">Зареєструйтесь</a></p>
+            <button type="submit" class="register-btn">Авторизуватися</button>
+        </form>
+    </div>
+    {% endblock %}
+</body>    
+</html>

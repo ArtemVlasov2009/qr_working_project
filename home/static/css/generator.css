@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    background-color: #202831; 
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    height: 1250px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.header_main { 
+    width: 100%; 
+    height: 100px; 
+    display: flex; 
+    align-items: center; 
+    padding: 0 20px; 
+    background-color: #252D38; 
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+    flex-direction: row;
+}
+
+.header_main a { 
+    color: #CAD1D4; 
+    font-size: 22px; 
+    text-decoration: none; 
+    padding: 10px; 
+    margin-top: 10px;
+    text-align: left; 
+}
+
+.header_main a.current-page { 
+    text-decoration: underline; 
+}
+
+.Logo_img { 
+    width: 100px; 
+    height: 100px; 
+    background-color: transparent; 
+    padding-right: 1200px;
+    padding-left: -10;
+    padding-top: 9px;
+    padding-left: 20px;
+}
+.Generator_frame {
+    width: 1000px;
+    height: 500px;
+    background-color: #252D38;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.Generator_header {
+    text-align: center;
+    color: #CAD1D4;
+    width: 1000px;
+    height: 40px;
+    background-color: #35475D;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    line-height: 40px; 
+    margin-top: -20px;
+}
+
+
+form {
+    color: #CAD1D4;
+    font-size: 15px;
+    width: 425px;
+    text-align: left;
+    margin-left: 40px;
+    width: 425px;
+    height: 410px;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #ffffff;
+    margin-bottom: 20px;
+    color: #CAD1D4; 
+}
+
+.qr_code_display{
+    width: 350px;
+    height: 350px;
+    background-color: #35475D;
+    border-radius: 5px;
+    position: absolute;
+    margin-left: 630px;
+    margin-top: -400px;
+    right: 40px;
+}
+.Buttom_Down {
+    margin-left: 620px;
+    margin-top: -120px; 
+    border: 1px solid #CAD1D4;
+    background-color: transparent;
+    font-size: 18px;
+    color: #CAD1D4;
+    border-radius: 5px;
+    width: 173px;
+    height: 35px;
+    position: absolute;
+    z-index: 9999; 
+}
+
+.Generator_internal_frame{
+    width: 425px;
+    height: 410px;
+    border: 1px solid #35475D;
+    border-radius: 5px;
+    margin-left: 40px;
+}
+
+.Arrow {
+    margin-left: 460px;
+    position: relative; 
+    top: -250px; 
+}
+
+.logout {
+    color: #CAD1D4; 
+    font-size: 22px; 
+    text-decoration: none; 
+    font-weight: bold;
+    padding-top: 9px; 
+    margin-right: 15px;
+    margin-left: 500px;
+}
+
+.home_url{
+    width: 700px;
+    height: 125px;
+    margin-top: 20px;
+}
+
+.Your_QR {
+    width: 250px;
+    height: 250px;
+    position: fixed;
+    margin-left: 50px;
+    margin-top: 25px;
+}
+
+.qr-code-container img {
+    display: block; /* Убедитесь, что изображение отображается как блок */
+    width: 100%; /* Ширина изображения */
+    max-width: 300px; /* Максимальная ширина */
+    height: auto; /* Автоматическая высота */
+    margin: 0 auto; /* Центрирование изображения */
+}

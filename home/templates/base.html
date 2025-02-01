@@ -1,0 +1,89 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Головна сторінка{% endblock %}</title>
+        {% block link %}
+            <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
+            <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+        {% endblock %}
+
+    </head>
+    <body>
+        {% block content %}
+        <header class="header_main">
+            <a href="{% url 'home' %}">
+                <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+            </a>
+            <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+            <a href="{% url 'registration' %}" class="{% if request.path == '/registration/' %}current-page{% endif %}">Реєстрація</a>
+            <a href="{% url 'authorization' %}" class="{% if request.path == '/authorization/' %}current-page{% endif %}">Авторизація</a>
+            <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+        </header>
+        <div>
+            <div class="Attention_alert">
+                <p>Ви маєте бути зареєстровані для генерації більше 1 qr коду</p>
+            </div>
+    
+            <h1>Створюйте власні QR-коди</h1>
+    
+            <p class = "Description_text">
+                Створюйте унікальні QR-коди легко та швидко з нашим зручним дизайнерським інтерфейсом! 
+                Персоналізуйте їх на свій смак, додаючи стиль та індивідуальність. 
+                Скористайтеся безкоштовним тарифним планом і отримайте можливість у будь-який момент повертатися, 
+                щоб оновлювати або редагувати свої коди. Простота, творчість і свобода — все це в одному сервісі!
+            </p>
+    
+            <img class="Qr_code_preview_img" src="{% static 'images/Qr_code_preview.png' %}" alt="Qr_code_preview"/>
+            <div class="plans_header">
+                <h1 class = "Tarif_Plans">Тарифні плани:</h1>
+                <div class="plans_container">
+                    <div class="plan">
+                        <h2>Basic (Безкоштовно)</h2>
+                        <p>
+                            Можливості:
+                            <ul>
+                                <li>Генерація статичних QR-кодів.</li>
+                                <li>Обмежена кількість QR-кодів (до 10 на місяць).</li>
+                                <li>Вибір базових кольорів і стилів.</li>
+                            </ul>
+                            Ідеально підходить для особистих цілей та невеликих завдань.
+                        </p>
+                        <a class="button" href="#">Оформити</a>
+                    </div>
+                    <div class="plan">
+                        <h2>Pro (10$/місяць)</h2>
+                        <p>
+                            Можливості:
+                            <ul>
+                                <li>Генерація як статичних, так і динамічних QR-кодів.</li>
+                                <li>Необмежена кількість QR-кодів.</li>
+                                <li>Можливість редагування кодів.</li>
+                                <li>Додаткові стилі.</li>
+                            </ul>
+                            Для малого бізнесу та професійного використання.
+                        </p>
+                        <a class="button" href="#">Оформити</a>
+                    </div>
+                    <div class="plan">
+                        <h2>Enterprise (50$/місяць)</h2>
+                        <p>
+                            Можливості:
+                            <ul>
+                                <li>Усі функції Pro-плану.</li>
+                                <li>Мультикористувацький доступ (до 10 користувачів).</li>
+                                <li>Підтримка власного бренду.</li>
+                                <li>Пріоритетна технічна підтримка.</li>
+                            </ul>
+                            Для великих компаній, які шукають гнучкі рішення.
+                        </p>
+                        <a class="button" href="#">Оформити</a>
+                    </div>
+                </div>
+            </div>            
+        {% endblock %}
+    </body>    
+</html>
