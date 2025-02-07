@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Сторінка історії генерацій{% endblock %}</title>
         {% block link %}
-            <link rel="stylesheet" href="{% static 'css/history_gen.css' %}"> 
+            <link rel="stylesheet" href="{% static 'css/history_gen.css' %}">
             <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
         {% endblock %}
     </head>
@@ -24,25 +24,22 @@
         <div>
             <div class="Header_Frame">
                 <p>Історія ваших генерацій</p>
-                {% comment %} <button>Пошук</button> {% endcomment %}
             </div> 
             <div class="Frame">
                 <div class="QR_Container">
+                    {% for qr in qr_codes %}
                     <div class="QR_Item">
-                        <img src="{% static 'images/qr_example1.png' %}" alt="Example 1">
-                        <p>Example 1</p>
+                        <!-- Display the QR code image, name, and creation date from the database -->
+                        <img src="{{ qr.image.url }}" alt="{{ qr.name }}">
+                        <p>{{ qr.name }}</p>
+                        <p>{{ qr.data_create }}</p>
                     </div>
-                    <div class="QR_Item">
-                        <img src="{% static 'images/qr_example2.png' %}" alt="Example 2">
-                        <p>Example 2</p>
-                    </div>
-                    <div class="QR_Item">
-                        <img src="{% static 'images/qr_example3.png' %}" alt="Example 3">
-                        <p>Example 3</p>
-                    </div>
+                    {% empty %}
+                    <p>У вас еще нет сгенерированных QR-кодов.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
         {% endblock %}
-    </body>    
+    </body>
 </html>

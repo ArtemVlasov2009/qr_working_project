@@ -1,5 +1,4 @@
 {% load static %}
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,12 +29,52 @@
                 {% csrf_token %}
                 <label for="name">Имя:</label>
                 <input type="text" id="name" name="name"><br><br>
+
                 <label for="link_or_text">Посилання або текст:</label>
                 <input type="text" id="link_or_text" name="link_or_text"><br><br>
-                <button class="Buttom_Down" type="submit">Генирувати</button>
-            </form>
 
-            <div class="qr-code-container">
+                <!-- Настройка размера QR-кода -->
+                <label for="size">Розмір QR-коду:</label>
+                <select id="size" name="size">
+                    <option value="200">200x200</option>
+                    <option value="300">300x300</option>
+                    <option value="400">400x400</option>
+                    <option value="500">500x500</option>
+                </select><br><br>
+
+                <!-- Настройка цвета QR-кода -->
+                <label for="color">Колір QR-коду:</label>
+                <input type="color" id="color" name="color" value="#000000"><br><br>
+
+                <!-- Добавление логотипа -->
+                <label for="logo">Додати логотип:</label>
+                <input type="file" id="logo" name="logo" accept="image/*"><br><br>
+
+                <!-- Настройка градієнту -->
+                <label for="gradient">Налаштувати градієнт:</label>
+                <input type="checkbox" id="gradient" name="gradient"><br><br>
+
+                <label for="color1">Колір 1:</label>
+                <input type="color" id="color1" name="color1" value="#ff0000"><br><br>
+
+                <label for="color2">Колір 2:</label>
+                <input type="color" id="color2" name="color2" value="#00ff00"><br><br>
+
+                <!-- Выбор формы QR-кода -->
+                <label for="round_corners">Форма QR-коду:</label><br>
+                <label>
+                    <input type="radio" id="round_corners" name="shape" value="rounded" checked>
+                    З закругленими кутами
+                </label><br>
+                <label>
+                    <input type="radio" id="square" name="shape" value="square">
+                    Квадратна форма
+                </label><br><br>
+
+                <button class="Buttom_Down" type="submit">Генерувати</button>
+                
+            </form>
+            <div class="qr-code-overlay">
                 {% if qr_image_url %}
                     <h2>Ваш QR-код:</h2>
                     <img src="{{ qr_image_url }}" alt="QR-код">
@@ -43,5 +82,5 @@
             </div>
         </div>
     </div>
-</body>    
+</body>
 </html>
