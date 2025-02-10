@@ -25,62 +25,61 @@
             <p>Згенеруйте ваш QR code</p>
         </div>
         <div class="Generator_internal_frame">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <label for="name">Имя:</label>
-                <input type="text" id="name" name="name"><br><br>
-
+                <input type="text" id="name" name="name" required><br><br>
                 <label for="link_or_text">Посилання або текст:</label>
-                <input type="text" id="link_or_text" name="link_or_text"><br><br>
-
-                <!-- Настройка размера QR-кода -->
-                <label for="size">Розмір QR-коду:</label>
+                <input type="text" id="link_or_text" name="link_or_text" required><br><br>
+                <label for="size">Розмір генерації QR-коду:</label>
                 <select id="size" name="size">
                     <option value="200">200x200</option>
                     <option value="300">300x300</option>
                     <option value="400">400x400</option>
                     <option value="500">500x500</option>
                 </select><br><br>
-
-                <!-- Настройка цвета QR-кода -->
-                <label for="color">Колір QR-коду:</label>
-                <input type="color" id="color" name="color" value="#000000"><br><br>
-
-                <!-- Добавление логотипа -->
+                <label for="qr_color">Колір QR-коду:</label>
+                <input type="color" id="qr_color" name="qr_color" value="#000000"><br><br>
+                <label for="bg_color">Колір фону:</label>
+                <input type="color" id="bg_color" name="bg_color" value="#FFFFFF"><br><br>
                 <label for="logo">Додати логотип:</label>
                 <input type="file" id="logo" name="logo" accept="image/*"><br><br>
-
-                <!-- Настройка градієнту -->
                 <label for="gradient">Налаштувати градієнт:</label>
                 <input type="checkbox" id="gradient" name="gradient"><br><br>
-
-                <label for="color1">Колір 1:</label>
-                <input type="color" id="color1" name="color1" value="#ff0000"><br><br>
-
-                <label for="color2">Колір 2:</label>
-                <input type="color" id="color2" name="color2" value="#00ff00"><br><br>
-
-                <!-- Выбор формы QR-кода -->
-                <label for="round_corners">Форма QR-коду:</label><br>
+                <div id="gradient-colors" style="display: none;">
+                    <label for="color1">Колір 1 градієнту:</label>
+                    <input type="color" id="color1" name="color1" value="#ff0000"><br><br>
+                    <label for="color2">Колір 2 градієнту:</label>
+                    <input type="color" id="color2" name="color2" value="#00ff00"><br><br>
+                </div>
+                <label for="shape">Форма QR-коду:</label><br>
                 <label>
-                    <input type="radio" id="round_corners" name="shape" value="rounded" checked>
+                    <input type="radio" name="shape" value="rounded" checked>
                     З закругленими кутами
                 </label><br>
                 <label>
-                    <input type="radio" id="square" name="shape" value="square">
+                    <input type="radio" name="shape" value="square">
                     Квадратна форма
                 </label><br><br>
-
                 <button class="Buttom_Down" type="submit">Генерувати</button>
-                
             </form>
             <div class="qr-code-overlay">
-                {% if qr_image_url %}
-                    <h2>Ваш QR-код:</h2>
-                    <img src="{{ qr_image_url }}" alt="QR-код">
-                {% endif %}
+                <h2>Ваш QR-код:</h2>
+                <div style="width: 200px; height: 200px; overflow: hidden;">
+                    {% if qr_image_url %}
+                        <img src="{{ qr_image_url }}" alt="QR-код" id="qr-code-img" style="width: 200px; height: 200px; object-fit: contain;">
+                    {% else %}
+                        <img src="{% static 'images/qrCodeExample.png' %}" alt="Placeholder" id="qr-code-placeholder" style="width: 200px; height: 200px; object-fit: contain;">
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('gradient').addEventListener('change', function() {
+            const gradientColors = document.getElementById('gradient-colors');
+            gradientColors.style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
 </body>
 </html>

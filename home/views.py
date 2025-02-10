@@ -11,8 +11,7 @@ import os
 from django.utils import timezone
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw, ImageFilter
-
-
+from .models import qr_code 
 
 def render_home(request):
     return render(request=request, template_name='base.html')
@@ -64,26 +63,23 @@ def render_authorization(request):
 def render_contacts(request):
     return render(request=request, template_name='contacts.html')
 
-
 def render_generator(request):
     if not request.user.is_authenticated:
         return redirect("registration")
-
-    qr_image_url = None
 
     if request.method == "POST":
         name = request.POST.get("name")
         link = request.POST.get("link_or_text")
         size = int(request.POST.get("size", 300))
-        color = request.POST.get("color", "#000000")
+        qr_color = request.POST.get("qr_color", "#000000")
+        bg_color = request.POST.get("bg_color", "#FFFFFF")
         logo_file = request.FILES.get("logo")
         use_gradient = request.POST.get("gradient") == "on"
         color1 = request.POST.get("color1", "#ff0000")
         color2 = request.POST.get("color2", "#00ff00")
-        shape = request.POST.get("shape", "square")  
-        round_corners = shape == "rounded"  
+        shape = request.POST.get("shape", "square")
+        round_corners = shape == "rounded"
 
-        
         if not name or not link:
             return render(request, "generator.html", {"error": "Заполните все поля"})
 
@@ -97,8 +93,8 @@ def render_generator(request):
             qr.add_data(link)
             qr.make(fit=True)
 
-            img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
-
+            img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
+            
             if use_gradient:
                 gradient = Image.new("RGBA", img.size)
                 draw = ImageDraw.Draw(gradient)
@@ -107,74 +103,55 @@ def render_generator(request):
                     r = int((1 - y / img.size[1]) * int(color1[1:3], 16) + (y / img.size[1]) * int(color2[1:3], 16))
                     g = int((1 - y / img.size[1]) * int(color1[3:5], 16) + (y / img.size[1]) * int(color2[3:5], 16))
                     b = int((1 - y / img.size[1]) * int(color1[5:7], 16) + (y / img.size[1]) * int(color2[5:7], 16))
-                    draw.line([(0, y), (img.size[0], y)], fill=(r, g, b))
+                    draw.line([(0, y), (img.size[0], y)], fill=(r, g, b, 255))
 
                 qr_data = img.getdata()
                 gradient_data = gradient.getdata()
-
                 new_data = []
                 for i in range(len(qr_data)):
-                    if qr_data[i][0] == 0:  
+                    if qr_data[i][0] < 128:
                         new_data.append(gradient_data[i])
                     else:
-                        new_data.append(qr_data[i])
-
+                        new_data.append((255, 255, 255, 0))
                 img.putdata(new_data)
 
-            else:
-                qr_data = img.getdata()
-                new_data = []
-                fill_color = tuple(int(color[i:i+2], 16) for i in (1, 3, 5)) + (255,)  
-
-                for item in qr_data:
-                    if item[0] == 0:  
-                        new_data.append(fill_color)
-                    else:
-                        new_data.append(item)
-
-                img.putdata(new_data)
+            img = img.resize((size, size), Image.Resampling.LANCZOS)
 
             if round_corners:
-                corner_radius = int(size * 0.05)  
-                mask = Image.new("L", img.size, 255)  
-
-                draw = ImageDraw.Draw(mask)
-                for x in range(img.size[0]):
-                    for y in range(img.size[1]):
-                        if img.getpixel((x, y))[0] == 0:  
-                            if (
-                                (x < corner_radius and y < corner_radius) or 
-                                (x < corner_radius and y > img.size[1] - corner_radius - 1) or  
-                                (x > img.size[0] - corner_radius - 1 and y < corner_radius) or  
-                                (x > img.size[0] - corner_radius - 1 and y > img.size[1] - corner_radius - 1)  
-                            ):
-                                distance = ((x - corner_radius)**2 + (y - corner_radius)**2)**0.5
-                                if distance > corner_radius:
-                                    mask.putpixel((x, y), 0)  
-
-                img.putalpha(mask)
+                corner_radius = int(size * 0.1)
+                qr_mask = Image.new('L', img.size, 0)
+                draw = ImageDraw.Draw(qr_mask)
+                qr_box = img.getbbox()
+                draw.rounded_rectangle(qr_box, corner_radius, fill=255)
+                output = Image.new('RGBA', img.size, (0, 0, 0, 0))
+                output.paste(img, mask=qr_mask)
+                img = output
 
             if logo_file:
                 try:
                     logo = Image.open(logo_file).convert("RGBA")
-
-                    logo_size = int(size * 0.2)
-                    logo = logo.resize((logo_size, logo_size))
-
-                    position = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
-
-                    img_with_logo = img.copy()
-
-                    img_with_logo.paste(logo, position, mask=logo)
-
-                    img = img_with_logo
-
+                    logo_size = int(size * 0.25)
+                    logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+                    pos_x = (size - logo_size) // 2
+                    pos_y = (size - logo_size) // 2
+                    logo_bg = Image.new('RGBA', (logo_size, logo_size), (255, 255, 255, 255))
+                    img.paste(logo_bg, (pos_x, pos_y))
+                    img.paste(logo, (pos_x, pos_y), logo)
                 except Exception as e:
-                    print(f"Ошибка при обработке логотипа: {e}")
+                    print(f"Error processing logo: {e}")
 
             buffer = BytesIO()
             img.save(buffer, format="PNG")
-            image_content = ContentFile(buffer.getvalue(), f"{name}.png")
+
+            user_folder = os.path.join(settings.MEDIA_ROOT, request.user.username)
+            if not os.path.exists(user_folder):
+                os.makedirs(user_folder)
+
+            file_path = os.path.join(user_folder, f"{name}.png")
+            with open(file_path, 'wb') as f:
+                f.write(buffer.getvalue())
+
+            qr_image_url = os.path.join(settings.MEDIA_URL, request.user.username, f"{name}.png")
 
             if qr_code.objects.filter(name=name).exists():
                 return render(request, "generator.html", {"error": "QR-код с таким именем уже существует"})
@@ -183,38 +160,27 @@ def render_generator(request):
                 name=name,
                 link=link,
                 size=size,
-                shape=1 if round_corners else 0,  
+                shape=1 if round_corners else 0,
                 custom_style="gradient" if use_gradient else "default",
                 data_create=timezone.now(),
                 expiry_date=(timezone.now() + timezone.timedelta(days=30)).timestamp(),
-                image=image_content
+                image=qr_image_url
             )
-
             qr_code_instance.save()
 
-            qr_image_url = qr_code_instance.image.url
-            print(f"QR-код успешно сохранен. Имя: {name}, URL: {qr_image_url}")
+            return render(request, "generator.html", {"qr_image_url": qr_image_url})
 
         except Exception as e:
-            print(f"Ошибка при создании QR-кода: {e}")
+            print(f"Error generating QR code: {e}")
             return render(request, "generator.html", {"error": "Произошла ошибка при генерации QR-кода"})
 
-    return render(request, "generator.html", {"qr_image_url": qr_image_url})
-
-
+    return render(request, "generator.html")
 
 
 def render_history_gen(request):
-    qr_codes = qr_code.objects.all() 
+    qr_codes = qr_code.objects.all()  
     return render(request, "history_gen.html", {"qr_codes": qr_codes})
 
 def logout_user(request):
     logout(request)
     return redirect('authorization')
-
-
-
-
-
-
-

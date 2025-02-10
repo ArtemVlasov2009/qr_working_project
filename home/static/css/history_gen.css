@@ -4,9 +4,10 @@ body {
     background-color: #202831; 
     font-family: 'Roboto', sans-serif;
     margin: 0;
-    height: 1250px;
+    height: 100vh;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .header_main { 
@@ -36,16 +37,15 @@ body {
     width: 100px; 
     height: 100px; 
     background-color: transparent; 
-    padding-right: 1200px;
-    padding-left: -10;
 }
 
 .Frame {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; 
-    margin: 0;
+    flex-direction: column;
+    margin: 0 auto;
+    padding-top: 150px;
 }
 
 .Header_Frame {
@@ -55,28 +55,62 @@ body {
     justify-content: center;
     align-items: center;
     background-color: #35475D;
-    position: absolute;
-    margin-top: 150px;
-    margin-left: 445px;
     color: #CAD1D4;
     font-size: 20px;
     font-weight: bold;
     text-align: left;
+    border-radius: 5px;
 }
 
 .QR_Container {
     width: 1031px;
-    height: 550px;
     background-color: #252D38;
     border-radius: 5px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;  
 }
 
-.QR_Item{
+.QR_Container::-webkit-scrollbar { 
+    display: none; 
+}
+
+.QR_Item {
     border: 1px solid #CAD1D4;
-    width: 280px;
-    height: 440px;
+    width: 200px;
+    height: 300px;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #35475D;
+}
+
+.QR_Image_Container {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-bottom: 1px solid #CAD1D4;
+    margin-bottom: 10px;
+}
+
+.QR_Image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.QR_Name {
+    font-weight: bold;
+    color: #CAD1D4;
+}
+
+.QR_Date {
+    color: #888;
 }

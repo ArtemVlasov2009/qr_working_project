@@ -2,44 +2,45 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Сторінка історії генерацій{% endblock %}</title>
-        {% block link %}
-            <link rel="stylesheet" href="{% static 'css/history_gen.css' %}">
-            <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
-        {% endblock %}
-    </head>
-    <body>
-        {% block content %}
-        <header class="header_main">
-            <a href="{% url 'home' %}">
-                <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
-            </a>
-            <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
-            <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Генерація коду</a>
-            <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
-        </header>
-        <div>
-            <div class="Header_Frame">
-                <p>Історія ваших генерацій</p>
-            </div> 
-            <div class="Frame">
-                <div class="QR_Container">
-                    {% for qr in qr_codes %}
-                    <div class="QR_Item">
-                        <!-- Display the QR code image, name, and creation date from the database -->
-                        <img src="{{ qr.image.url }}" alt="{{ qr.name }}">
-                        <p>{{ qr.name }}</p>
-                        <p>{{ qr.data_create }}</p>
-                    </div>
-                    {% empty %}
-                    <p>У вас еще нет сгенерированных QR-кодов.</p>
-                    {% endfor %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сторінка історії генерацій{% endblock %}</title>
+    {% block link %}
+        <link rel="stylesheet" href="{% static 'css/history_gen.css' %}">
+        <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <header class="header_main">
+        <a href="{% url 'home' %}">
+            <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+        </a>
+        <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Генерація коду</a>
+        <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+    </header>
+    <div class="Frame">
+        <div class="Header_Frame">
+            <p>Історія ваших генерацій</p>
+        </div> 
+        <div class="QR_Container">
+            {% for qr in qr_codes %}
+            <div class="QR_Item">
+                <div class="QR_Image_Container">
+                    <img src="{{ qr.image.url }}" alt="{{ qr.name }}" class="QR_Image">
+                </div>
+                <div class="QR_Details">
+                    <p class="QR_Name">{{ qr.name }}</p>
+                    <p class="QR_Date">{{ qr.data_create|date:"d M Y H:i" }}</p>
                 </div>
             </div>
+            {% empty %}
+            <p>У вас еще нет сгенерированных QR-кодов.</p>
+            {% endfor %}
         </div>
-        {% endblock %}
-    </body>
+    </div>
+    {% endblock %}
+</body>
 </html>
