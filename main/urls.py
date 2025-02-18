@@ -18,6 +18,7 @@ from django.urls import path
 from home.views import *
 from django.conf import settings
 from django.conf.urls.static import static
+from home import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +29,10 @@ urlpatterns = [
     path('contacts/', render_contacts, name='contacts'),
     path('generator/', render_generator, name='generator'),
     path('history_gen/', render_history_gen, name='history_generations'),
+    path('free/', render_free, name='free'),
+    path('standart/', render_standard, name='standart'),
+    path('pro/', render_pro, name='pro'),
+    path('delete_qr_code/<int:qr_id>/', views.delete_qr_code, name='delete_qr_code')
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

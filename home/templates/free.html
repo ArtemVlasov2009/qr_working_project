@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Сторінка генерації</title>
-    <link rel="stylesheet" href="{% static 'css/generator.css' %}">
+    <link rel="stylesheet" href="{% static 'css/free.css' %}">
     <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+    <style>
+        .blocked-text {
+            color: #FF6F61;
+        }
+    </style>
 </head>
 <body>
     <header class="header_main">
@@ -38,40 +43,40 @@
                     <option value="400">400x400</option>
                     <option value="500">500x500</option>
                 </select><br><br>
-                <label for="qr_color">Колір QR-коду:</label>
-                <input type="color" id="qr_color" name="qr_color" value="#000000"><br><br>
-                <label for="bg_color">Колір фону:</label>
-                <input type="color" id="bg_color" name="bg_color" value="#FFFFFF"><br><br>
-                <label for="logo">Додати логотип:</label>
-                <input type="file" id="logo" name="logo" accept="image/*"><br><br>
-                <label for="gradient">Налаштувати градієнт:</label>
-                <input type="checkbox" id="gradient" name="gradient"><br><br>
+                <label for="qr_color"><span class="blocked-text">Колір QR-коду<br>(заблоковано, потрібно оформити вищу підписку):</span></label>
+                <input type="color" id="qr_color" name="qr_color" value="#000000" disabled><br><br>
+                <label for="bg_color"><span class="blocked-text">Колір фону<br>(заблоковано, потрібно оформити вищу підписку):</span></label>
+                <input type="color" id="bg_color" name="bg_color" value="#FFFFFF" disabled><br><br>
+                <label for="logo"><span class="blocked-text">Додати логотип<br>(заблоковано, потрібно оформити вищу підписку):</span></label>
+                <input type="file" id="logo" name="logo" accept="image/*" disabled><br><br>
+                <label for="gradient"><span class="blocked-text">Налаштувати градієнт<br>(заблоковано, потрібно оформити вищу підписку):</span></label>
+                <input type="checkbox" id="gradient" name="gradient" disabled><br><br>
                 <div id="gradient-colors" style="display: none;">
-                    <label for="color1">Колір 1 градієнту:</label>
-                    <input type="color" id="color1" name="color1" value="#ff0000"><br><br>
-                    <label for="color2">Колір 2 градієнту:</label>
-                    <input type="color" id="color2" name="color2" value="#00ff00"><br><br>
+                    <label for="color1"><span class="blocked-text">Колір 1 градієнту<br>(заблоковано, потрібно оформити вищу підписку):</span></label>
+                    <input type="color" id="color1" name="color1" value="#ff0000" disabled><br><br>
+                    <label for="color2"><span class="blocked-text">Колір 2 градієнту<br>(заблоковано, потрібно оформити вищу підписку):</span></label>
+                    <input type="color" id="color2" name="color2" value="#00ff00" disabled><br><br>
                 </div>
-                <label for="shape">Форма QR-коду:</label><br>
+                <label for="shape"><span class="blocked-text">Форма QR-коду<br>(заблоковано, потрібно оформити вищу підписку):</span></label><br>
                 <label>
-                    <input type="radio" name="shape" value="rounded" checked>
+                    <input type="radio" name="shape" value="rounded" checked disabled>
                     З закругленими кутами
                 </label><br>
                 <label>
-                    <input type="radio" name="shape" value="square">
+                    <input type="radio" name="shape" value="square" disabled>
                     Квадратна форма
                 </label><br><br>
-                <label for="element_shape">Форма елементів QR-коду:</label><br>
+                <label for="element_shape"><span class="blocked-text">Форма елементів QR-коду<br>(заблоковано, потрібно оформити вищу підписку):</span></label><br>
                 <label>
-                    <input type="radio" name="element_shape" value="circle" checked>
+                    <input type="radio" name="element_shape" value="circle" checked disabled>
                     Кружки
                 </label><br>
                 <label>
-                    <input type="radio" name="element_shape" value="triangle">
+                    <input type="radio" name="element_shape" value="triangle" disabled>
                     Трикутники
                 </label><br>
                 <label>
-                    <input type="radio" name="element_shape" value="square">
+                    <input type="radio" name="element_shape" value="square" disabled>
                     Квадрати
                 </label><br><br>
                 <button class="Buttom_Down" type="submit">Генерувати</button>
@@ -88,11 +93,5 @@
             </div>
         </div>
     </div>
-    <script>
-        document.getElementById('gradient').addEventListener('change', function() {
-            const gradientColors = document.getElementById('gradient-colors');
-            gradientColors.style.display = this.checked ? 'block' : 'none';
-        });
-    </script>
 </body>
 </html>

@@ -10,11 +10,17 @@ from django.conf import settings
 import os
 from django.utils import timezone
 from django.core.files.base import ContentFile
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 from .models import qr_code 
+import segno
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
+from django.utils import timezone
+from datetime import timedelta
 
 def render_home(request):
     return render(request=request, template_name='base.html')
+
 
 def render_registration(request):
     show_text_passwords_dont_match = False
@@ -43,6 +49,7 @@ def render_registration(request):
         }
     )
 
+
 def render_authorization(request):
     user = True
     if request.method == "POST":
@@ -60,8 +67,10 @@ def render_authorization(request):
 
     return render(request, "authorization.html", {"user": user})
 
+
 def render_contacts(request):
     return render(request=request, template_name='contacts.html')
+
 
 def render_generator(request):
     if not request.user.is_authenticated:
@@ -79,6 +88,7 @@ def render_generator(request):
         color2 = request.POST.get("color2", "#00ff00")
         shape = request.POST.get("shape", "square")
         round_corners = shape == "rounded"
+        element_shape = request.POST.get("element_shape", "square")
 
         if not name or not link:
             return render(request, "generator.html", {"error": "Заполните все поля"})
@@ -94,7 +104,25 @@ def render_generator(request):
             qr.make(fit=True)
 
             img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
-            
+
+            if element_shape == "circle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = (x, y, x + qr.box_size, y + qr.box_size)
+                        draw.ellipse(box, fill=255)
+                img.putalpha(mask)
+
+            elif element_shape == "triangle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = [(x, y + qr.box_size), (x + qr.box_size // 2, y), (x + qr.box_size, y + qr.box_size)]
+                        draw.polygon(box, fill=255)
+                img.putalpha(mask)
+
             if use_gradient:
                 gradient = Image.new("RGBA", img.size)
                 draw = ImageDraw.Draw(gradient)
@@ -154,7 +182,10 @@ def render_generator(request):
             qr_image_url = os.path.join(settings.MEDIA_URL, request.user.username, f"{name}.png")
 
             if qr_code.objects.filter(name=name).exists():
-                return render(request, "generator.html", {"error": "QR-код с таким именем уже существует"})
+                return render(request, "generator.html", {"error": "QR-код із таким ім'ям вже існує"})
+
+
+            creation_time = timezone.now() + timedelta(hours=2)
 
             qr_code_instance = qr_code(
                 name=name,
@@ -162,8 +193,8 @@ def render_generator(request):
                 size=size,
                 shape=1 if round_corners else 0,
                 custom_style="gradient" if use_gradient else "default",
-                data_create=timezone.now(),
-                expiry_date=(timezone.now() + timezone.timedelta(days=30)).timestamp(),
+                data_create=creation_time,  
+                expiry_date=(creation_time + timedelta(days=30)).timestamp(),
                 image=qr_image_url
             )
             qr_code_instance.save()
@@ -181,6 +212,29 @@ def render_history_gen(request):
     qr_codes = qr_code.objects.all()  
     return render(request, "history_gen.html", {"qr_codes": qr_codes})
 
+
 def logout_user(request):
     logout(request)
     return redirect('authorization')
+
+
+def render_free(request):
+    return render(request, "free.html")
+
+
+def render_standard(request):
+    return render(request, "standart.html")
+
+
+def render_pro(request):
+    return render(request, "pro.html")
+
+
+def delete_qr_code(request, qr_id):
+    qr = get_object_or_404(qr_code, id=qr_id)
+    if qr.image:
+        image_path = os.path.join(settings.MEDIA_ROOT, qr.image.name)
+        if os.path.isfile(image_path):
+            os.remove(image_path)
+    qr.delete()
+    return redirect('history_generations')

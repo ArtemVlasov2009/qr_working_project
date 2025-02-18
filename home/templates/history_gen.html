@@ -1,7 +1,6 @@
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
+{% load filters %} 
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,12 +13,16 @@
 <body>
     {% block content %}
     <header class="header_main">
-        <a href="{% url 'home' %}">
+        <a class='home_url' href="{% url 'home' %}">
             <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
         </a>
         <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
-        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Генерація коду</a>
+        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Кодогенерація</a>
+        <a id="generation" href="{% url 'history_generations' %}" class="{% if request.path == '/history_generations/' %}current-page{% endif %}">Генерації</a>
         <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+        <div class="logout">
+            <a class="logout_кнопка" href="{% url 'logout' %}">Вийти: {{ request.user.username }}</a>
+        </div>
     </header>
     <div class="Frame">
         <div class="Header_Frame">
@@ -29,15 +32,22 @@
             {% for qr in qr_codes %}
             <div class="QR_Item">
                 <div class="QR_Image_Container">
-                    <img src="{{ qr.image.url }}" alt="{{ qr.name }}" class="QR_Image">
+                    <img src="{{ qr.image }}" alt="{{ qr.name }}" class="QR_Image" onerror="this.onerror=null;this.src='{% static 'images/default_image.png' %}';">
                 </div>
                 <div class="QR_Details">
-                    <p class="QR_Name">{{ qr.name }}</p>
-                    <p class="QR_Date">{{ qr.data_create|date:"d M Y H:i" }}</p>
+                    <p class="QR_Name">Назва: {{ qr.name }}</p>
+                    <p class="QR_Date">Дата створення: {{ qr.data_create|ukrainian_date }}</p>
+                    <div class="QR_Actions">
+                        <a href="{{ qr.image }}" download="{{ qr.name }}.png" class="download-btn">Завантажити</a>
+                        <form method="post" action="{% url 'delete_qr_code' qr.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">Видалити</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% empty %}
-            <p>У вас еще нет сгенерированных QR-кодов.</p>
+            <p>У вас ще немає згенерованих QR-кодів.</p>
             {% endfor %}
         </div>
     </div>

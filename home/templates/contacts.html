@@ -14,12 +14,16 @@
 <body>
     {% block content %}
     <header class="header_main">
-        <a href="{% url 'home' %}">
+        <a class='home_url' href="{% url 'home' %}">
             <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
         </a>
         <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
-        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Генерація коду</a>
+        <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Кодогенерація</a>
+        <a href="{% url 'history_generations' %}" class="{% if request.path == '/history_generations/' %}current-page{% endif %}">Генерації</a>
         <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+        <div class="logout">
+            <a class="logout_кнопка" href="{% url 'logout' %}">Вийти: {{ request.user.username }}</a>
+        </div>
     </header>
     <div>
         <div class="Header_Frame">
