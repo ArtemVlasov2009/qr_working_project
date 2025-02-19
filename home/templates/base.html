@@ -47,12 +47,16 @@
                             Можливості:
                             <ul>
                                 <li>Генерація статичних QR-кодів.</li>
-                                <li>Обмежена кількість QR-кодів (до 10 на місяць).</li>
+                                <li>Обмежена кількість QR-кодів (до 1 на місяць).</li>
                                 <li>Вибір базових кольорів і стилів.</li>
                             </ul>
                             Ідеально підходить для особистих цілей та невеликих завдань.
                         </p>
-                        <a class="button" href="#">Оформити</a>
+                        <form action="{% url 'choose_plan' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan" value="free">
+                            <button type="submit" class="button">Оформити</button>
+                        </form>
                     </div>
                     <div class="plan">
                         <h2>Standart (10$/місяць)</h2>
@@ -60,13 +64,17 @@
                             Можливості:
                             <ul>
                                 <li>Генерація як статичних, так і динамічних QR-кодів.</li>
-                                <li>Необмежена кількість QR-кодів.</li>
+                                <li>Обмежена кількість QR-кодів (до 50 на місяць).</li>
                                 <li>Можливість редагування кодів.</li>
                                 <li>Додаткові стилі.</li>
                             </ul>
                             Для малого бізнесу та професійного використання.
                         </p>
-                        <a class="button" href="#">Оформити</a>
+                        <form action="{% url 'choose_plan' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan" value="standard">
+                            <button type="submit" class="button">Оформити</button>
+                        </form>
                     </div>
                     <div class="plan">
                         <h2>Pro (50$/місяць)</h2>
@@ -74,13 +82,18 @@
                             Можливості:
                             <ul>
                                 <li>Усі функції Pro-плану.</li>
+                                <li>Обмежена кількість QR-кодів (до 100 на місяць).</li>
                                 <li>Мультикористувацький доступ (до 10 користувачів).</li>
                                 <li>Підтримка власного бренду.</li>
                                 <li>Пріоритетна технічна підтримка.</li>
                             </ul>
                             Для великих компаній, які шукають гнучкі рішення.
                         </p>
-                        <a class="button" href="#">Оформити</a>
+                        <form action="{% url 'choose_plan' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan" value="pro">
+                            <button type="submit" class="button">Оформити</button>
+                        </form>
                     </div>
                 </div>
             </div>            

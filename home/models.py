@@ -5,6 +5,8 @@ from django.utils import timezone
 class Subscribers(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscriber = models.CharField(max_length=255)
+    qr_code_count = models.IntegerField(default=0)  
+    plan = models.CharField(max_length=10, default='free')  
 
     def __str__(self):
         return self.subscriber

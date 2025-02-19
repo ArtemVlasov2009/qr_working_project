@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.files.base import ContentFile
 import qrcode
 from io import BytesIO
-from home.models import qr_code  
+from home.models import qr_code, Subscribers
 from django.conf import settings
 import os
 from django.utils import timezone
@@ -63,9 +63,30 @@ def render_authorization(request):
         if user:
             login(request, user)
             print(f"Debug: Username: {username}, Password: {password}")
-            return redirect('generator')
+
+            # Проверяем, был ли выбран план до авторизации
+            selected_plan = request.session.get('selected_plan', None)
+            
+            if selected_plan:
+                # Перенаправляем на страницу выбранного плана
+                if selected_plan == 'free':
+                    return redirect('free')
+                elif selected_plan == 'standard':
+                    return redirect('standart')
+                elif selected_plan == 'pro':
+                    return redirect('pro')
+            else:
+                # Если план не выбран, перенаправляем на генератор
+                return redirect('generator')
 
     return render(request, "authorization.html", {"user": user})
+
+def choose_plan(request):
+    if request.method == 'POST':
+        plan = request.POST.get('plan')  # Получаем выбранный план
+        request.session['selected_plan'] = plan  # Сохраняем план в сессии
+        return redirect('authorization')  # Перенаправляем на авторизацию
+    return redirect('home')  # Если метод не POST, возвращаем на главную
 
 
 def render_contacts(request):
@@ -74,8 +95,17 @@ def render_contacts(request):
 
 def render_generator(request):
     if not request.user.is_authenticated:
-        return redirect("registration")
-
+        return redirect('authorization')
+    
+    subscriber, created = Subscribers.objects.get_or_create(user=request.user)
+    
+    if subscriber.plan == 'free' and subscriber.qr_code_count >= 1:
+        return HttpResponse("Ви досягли ліміту генерації QR-кодів для безкоштовного тарифу.")
+    elif subscriber.plan == 'standard' and subscriber.qr_code_count >= 50:
+        return HttpResponse("Ви досягли ліміту генерації QR-кодів для стандартного тарифу.")
+    elif subscriber.plan == 'pro' and subscriber.qr_code_count >= 100:
+        return HttpResponse("Ви досягли ліміту генерації QR-кодів для Pro тарифу.")
+    
     if request.method == "POST":
         name = request.POST.get("name")
         link = request.POST.get("link_or_text")
@@ -204,8 +234,9 @@ def render_generator(request):
         except Exception as e:
             print(f"Error generating QR code: {e}")
             return render(request, "generator.html", {"error": "Произошла ошибка при генерации QR-кода"})
-
-    return render(request, "generator.html")
+    subscriber.qr_code_count += 1
+    subscriber.save()
+    return render(request, 'generator.html')
 
 
 def render_history_gen(request):
@@ -217,18 +248,157 @@ def logout_user(request):
     logout(request)
     return redirect('authorization')
 
-
+# Фришная подписка
 def render_free(request):
+    if not request.user.is_authenticated:
+        return redirect("authorization")  # Перенаправляем на авторизацию, если пользователь не авторизован
+    
+    # Получаем или создаем подписчика
+    subscriber, created = Subscribers.objects.get_or_create(user=request.user)
+    
+    # Проверяем лимит для бесплатной подписки
+    if subscriber.plan == 'free' and subscriber.qr_code_count >= 1:
+        # Передаем флаг для отображения модального окна
+        return render(request, "free.html", {"show_limit_modal": True})
+    
+    if request.method == "POST":
+        name = request.POST.get("name")
+        link = request.POST.get("link_or_text")
+        size = int(request.POST.get("size", 300))
+        qr_color = request.POST.get("qr_color", "#000000")
+        bg_color = request.POST.get("bg_color", "#FFFFFF")
+        logo_file = request.FILES.get("logo")
+        use_gradient = request.POST.get("gradient") == "on"
+        color1 = request.POST.get("color1", "#ff0000")
+        color2 = request.POST.get("color2", "#00ff00")
+        shape = request.POST.get("shape", "square")
+        round_corners = shape == "rounded"
+        element_shape = request.POST.get("element_shape", "square")
+        
+        if not name or not link:
+            return render(request, "free.html", {"error": "Заповніть всі поля"})
+        
+        try:
+            # Генерация QR-кода
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(link)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
+            
+            # Обработка формы элементов
+            if element_shape == "circle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = (x, y, x + qr.box_size, y + qr.box_size)
+                        draw.ellipse(box, fill=255)
+                img.putalpha(mask)
+            elif element_shape == "triangle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = [(x, y + qr.box_size), (x + qr.box_size // 2, y), (x + qr.box_size, y + qr.box_size)]
+                        draw.polygon(box, fill=255)
+                img.putalpha(mask)
+            
+            # Градиент
+            if use_gradient:
+                gradient = Image.new("RGBA", img.size)
+                draw = ImageDraw.Draw(gradient)
+                for y in range(img.size[1]):
+                    r = int((1 - y / img.size[1]) * int(color1[1:3], 16) + (y / img.size[1]) * int(color2[1:3], 16))
+                    g = int((1 - y / img.size[1]) * int(color1[3:5], 16) + (y / img.size[1]) * int(color2[3:5], 16))
+                    b = int((1 - y / img.size[1]) * int(color1[5:7], 16) + (y / img.size[1]) * int(color2[5:7], 16))
+                    draw.line([(0, y), (img.size[0], y)], fill=(r, g, b, 255))
+                
+                qr_data = img.getdata()
+                gradient_data = gradient.getdata()
+                new_data = []
+                for i in range(len(qr_data)):
+                    if qr_data[i][0] < 128:
+                        new_data.append(gradient_data[i])
+                    else:
+                        new_data.append((255, 255, 255, 0))
+                img.putdata(new_data)
+            
+            # Изменение размера
+            img = img.resize((size, size), Image.Resampling.LANCZOS)
+            
+            # Скругленные углы
+            if round_corners:
+                corner_radius = int(size * 0.1)
+                qr_mask = Image.new('L', img.size, 0)
+                draw = ImageDraw.Draw(qr_mask)
+                qr_box = img.getbbox()
+                draw.rounded_rectangle(qr_box, corner_radius, fill=255)
+                output = Image.new('RGBA', img.size, (0, 0, 0, 0))
+                output.paste(img, mask=qr_mask)
+                img = output
+            
+            # Логотип
+            if logo_file:
+                try:
+                    logo = Image.open(logo_file).convert("RGBA")
+                    logo_size = int(size * 0.25)
+                    logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+                    pos_x = (size - logo_size) // 2
+                    pos_y = (size - logo_size) // 2
+                    logo_bg = Image.new('RGBA', (logo_size, logo_size), (255, 255, 255, 255))
+                    img.paste(logo_bg, (pos_x, pos_y))
+                    img.paste(logo, (pos_x, pos_y), logo)
+                except Exception as e:
+                    print(f"Error processing logo: {e}")
+            
+            # Сохранение изображения
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            
+            user_folder = os.path.join(settings.MEDIA_ROOT, request.user.username)
+            if not os.path.exists(user_folder):
+                os.makedirs(user_folder)
+            
+            file_path = os.path.join(user_folder, f"{name}.png")
+            with open(file_path, 'wb') as f:
+                f.write(buffer.getvalue())
+            
+            qr_image_url = os.path.join(settings.MEDIA_URL, request.user.username, f"{name}.png")
+            
+            # Проверка на уникальность имени QR-кода
+            if qr_code.objects.filter(name=name).exists():
+                return render(request, "free.html", {"error": "QR-код із таким ім'ям вже існує"})
+            
+            # Сохранение QR-кода в базу данных
+            creation_time = timezone.now() + timedelta(hours=2)
+            qr_code_instance = qr_code(
+                name=name,
+                link=link,
+                size=size,
+                shape=1 if round_corners else 0,
+                custom_style="gradient" if use_gradient else "default",
+                data_create=creation_time,
+                expiry_date=(creation_time + timedelta(days=30)).timestamp(),
+                image=qr_image_url
+            )
+            qr_code_instance.save()
+            
+            # Увеличиваем счетчик сгенерированных QR-кодов
+            subscriber.qr_code_count += 1
+            subscriber.save()
+            
+            return render(request, "free.html", {"qr_image_url": qr_image_url})
+        
+        except Exception as e:
+            print(f"Error generating QR code: {e}")
+            return render(request, "free.html", {"error": "Помилка при генерації QR-коду"})
+    
     return render(request, "free.html")
-
-
-def render_standard(request):
-    return render(request, "standart.html")
-
-
-def render_pro(request):
-    return render(request, "pro.html")
-
 
 def delete_qr_code(request, qr_id):
     qr = get_object_or_404(qr_code, id=qr_id)
@@ -237,4 +407,325 @@ def delete_qr_code(request, qr_id):
         if os.path.isfile(image_path):
             os.remove(image_path)
     qr.delete()
+
+    # Обновляем счетчик сгенерированных QR-кодов подписчика
+    subscriber, created = Subscribers.objects.get_or_create(user=request.user)
+    subscriber.qr_code_count = max(subscriber.qr_code_count - 1, 0)  # Уменьшаем счетчик, но не ниже 0
+    subscriber.save()
+
     return redirect('history_generations')
+
+        
+
+# Стандартная подписка
+def render_standard(request):
+    if not request.user.is_authenticated:
+        return redirect("authorization")  # Перенаправляем на авторизацию, если пользователь не авторизован
+    
+    # Получаем или создаем подписчика
+    subscriber, created = Subscribers.objects.get_or_create(user=request.user)
+    
+    # Проверяем лимит для стандартной подписки
+    if subscriber.plan == 'standard' and subscriber.qr_code_count >= 50:
+        return HttpResponse("Ви досягли ліміту генерації QR-кодів для стандартного тарифу.")
+    
+    if request.method == "POST":
+        name = request.POST.get("name")
+        link = request.POST.get("link_or_text")
+        size = int(request.POST.get("size", 300))
+        qr_color = request.POST.get("qr_color", "#000000")
+        bg_color = request.POST.get("bg_color", "#FFFFFF")
+        logo_file = request.FILES.get("logo")
+        use_gradient = request.POST.get("gradient") == "on"
+        color1 = request.POST.get("color1", "#ff0000")
+        color2 = request.POST.get("color2", "#00ff00")
+        shape = request.POST.get("shape", "square")
+        round_corners = shape == "rounded"
+        element_shape = request.POST.get("element_shape", "square")
+        
+        if not name or not link:
+            return render(request, "standart.html", {"error": "Заповніть всі поля"})
+        
+        try:
+            # Генерация QR-кода
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(link)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
+            
+            # Обработка формы элементов
+            if element_shape == "circle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = (x, y, x + qr.box_size, y + qr.box_size)
+                        draw.ellipse(box, fill=255)
+                img.putalpha(mask)
+            elif element_shape == "triangle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = [(x, y + qr.box_size), (x + qr.box_size // 2, y), (x + qr.box_size, y + qr.box_size)]
+                        draw.polygon(box, fill=255)
+                img.putalpha(mask)
+            
+            # Градиент
+            if use_gradient:
+                gradient = Image.new("RGBA", img.size)
+                draw = ImageDraw.Draw(gradient)
+                for y in range(img.size[1]):
+                    r = int((1 - y / img.size[1]) * int(color1[1:3], 16) + (y / img.size[1]) * int(color2[1:3], 16))
+                    g = int((1 - y / img.size[1]) * int(color1[3:5], 16) + (y / img.size[1]) * int(color2[3:5], 16))
+                    b = int((1 - y / img.size[1]) * int(color1[5:7], 16) + (y / img.size[1]) * int(color2[5:7], 16))
+                    draw.line([(0, y), (img.size[0], y)], fill=(r, g, b, 255))
+                
+                qr_data = img.getdata()
+                gradient_data = gradient.getdata()
+                new_data = []
+                for i in range(len(qr_data)):
+                    if qr_data[i][0] < 128:
+                        new_data.append(gradient_data[i])
+                    else:
+                        new_data.append((255, 255, 255, 0))
+                img.putdata(new_data)
+            
+            # Изменение размера
+            img = img.resize((size, size), Image.Resampling.LANCZOS)
+            
+            # Скругленные углы
+            if round_corners:
+                corner_radius = int(size * 0.1)
+                qr_mask = Image.new('L', img.size, 0)
+                draw = ImageDraw.Draw(qr_mask)
+                qr_box = img.getbbox()
+                draw.rounded_rectangle(qr_box, corner_radius, fill=255)
+                output = Image.new('RGBA', img.size, (0, 0, 0, 0))
+                output.paste(img, mask=qr_mask)
+                img = output
+            
+            # Логотип
+            if logo_file:
+                try:
+                    logo = Image.open(logo_file).convert("RGBA")
+                    logo_size = int(size * 0.25)
+                    logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+                    pos_x = (size - logo_size) // 2
+                    pos_y = (size - logo_size) // 2
+                    logo_bg = Image.new('RGBA', (logo_size, logo_size), (255, 255, 255, 255))
+                    img.paste(logo_bg, (pos_x, pos_y))
+                    img.paste(logo, (pos_x, pos_y), logo)
+                except Exception as e:
+                    print(f"Error processing logo: {e}")
+            
+            # Сохранение изображения
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            
+            user_folder = os.path.join(settings.MEDIA_ROOT, request.user.username)
+            if not os.path.exists(user_folder):
+                os.makedirs(user_folder)
+            
+            file_path = os.path.join(user_folder, f"{name}.png")
+            with open(file_path, 'wb') as f:
+                f.write(buffer.getvalue())
+            
+            qr_image_url = os.path.join(settings.MEDIA_URL, request.user.username, f"{name}.png")
+            
+            # Проверка на уникальность имени QR-кода
+            if qr_code.objects.filter(name=name).exists():
+                return render(request, "standart.html", {"error": "QR-код із таким ім'ям вже існує"})
+            
+            # Сохранение QR-кода в базу данных
+            creation_time = timezone.now() + timedelta(hours=2)
+            qr_code_instance = qr_code(
+                name=name,
+                link=link,
+                size=size,
+                shape=1 if round_corners else 0,
+                custom_style="gradient" if use_gradient else "default",
+                data_create=creation_time,
+                expiry_date=(creation_time + timedelta(days=30)).timestamp(),
+                image=qr_image_url
+            )
+            qr_code_instance.save()
+            
+            # Увеличиваем счетчик сгенерированных QR-кодов
+            subscriber.qr_code_count += 1
+            subscriber.save()
+            
+            return render(request, "standart.html", {"qr_image_url": qr_image_url})
+        
+        except Exception as e:
+            print(f"Error generating QR code: {e}")
+            return render(request, "standart.html", {"error": "Помилка при генерації QR-коду"})
+    
+    return render(request, "standart.html")
+
+
+# Прошка 
+def render_pro(request):
+    if not request.user.is_authenticated:
+        return redirect("authorization")  # Перенаправляем на авторизацию, если пользователь не авторизован
+    
+    # Получаем или создаем подписчика
+    subscriber, created = Subscribers.objects.get_or_create(user=request.user)
+    
+    # Проверяем лимит для Pro-подписки
+    if subscriber.plan == 'pro' and subscriber.qr_code_count >= 100:
+        return HttpResponse("Ви досягли ліміту генерації QR-кодів для Pro тарифу.")
+    
+    if request.method == "POST":
+        name = request.POST.get("name")
+        link = request.POST.get("link_or_text")
+        size = int(request.POST.get("size", 300))
+        qr_color = request.POST.get("qr_color", "#000000")
+        bg_color = request.POST.get("bg_color", "#FFFFFF")
+        logo_file = request.FILES.get("logo")
+        use_gradient = request.POST.get("gradient") == "on"
+        color1 = request.POST.get("color1", "#ff0000")
+        color2 = request.POST.get("color2", "#00ff00")
+        shape = request.POST.get("shape", "square")
+        round_corners = shape == "rounded"
+        element_shape = request.POST.get("element_shape", "square")
+        
+        if not name or not link:
+            return render(request, "pro.html", {"error": "Заповніть всі поля"})
+        
+        try:
+            # Генерация QR-кода
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(link)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
+            
+            # Обработка формы элементов
+            if element_shape == "circle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = (x, y, x + qr.box_size, y + qr.box_size)
+                        draw.ellipse(box, fill=255)
+                img.putalpha(mask)
+            elif element_shape == "triangle":
+                mask = Image.new("L", img.size, 0)
+                draw = ImageDraw.Draw(mask)
+                for x in range(0, img.size[0], qr.box_size):
+                    for y in range(0, img.size[1], qr.box_size):
+                        box = [(x, y + qr.box_size), (x + qr.box_size // 2, y), (x + qr.box_size, y + qr.box_size)]
+                        draw.polygon(box, fill=255)
+                img.putalpha(mask)
+            
+            # Градиент
+            if use_gradient:
+                gradient = Image.new("RGBA", img.size)
+                draw = ImageDraw.Draw(gradient)
+                for y in range(img.size[1]):
+                    r = int((1 - y / img.size[1]) * int(color1[1:3], 16) + (y / img.size[1]) * int(color2[1:3], 16))
+                    g = int((1 - y / img.size[1]) * int(color1[3:5], 16) + (y / img.size[1]) * int(color2[3:5], 16))
+                    b = int((1 - y / img.size[1]) * int(color1[5:7], 16) + (y / img.size[1]) * int(color2[5:7], 16))
+                    draw.line([(0, y), (img.size[0], y)], fill=(r, g, b, 255))
+                
+                qr_data = img.getdata()
+                gradient_data = gradient.getdata()
+                new_data = []
+                for i in range(len(qr_data)):
+                    if qr_data[i][0] < 128:
+                        new_data.append(gradient_data[i])
+                    else:
+                        new_data.append((255, 255, 255, 0))
+                img.putdata(new_data)
+            
+            # Изменение размера
+            img = img.resize((size, size), Image.Resampling.LANCZOS)
+            
+            # Скругленные углы
+            if round_corners:
+                corner_radius = int(size * 0.1)
+                qr_mask = Image.new('L', img.size, 0)
+                draw = ImageDraw.Draw(qr_mask)
+                qr_box = img.getbbox()
+                draw.rounded_rectangle(qr_box, corner_radius, fill=255)
+                output = Image.new('RGBA', img.size, (0, 0, 0, 0))
+                output.paste(img, mask=qr_mask)
+                img = output
+            
+            # Логотип
+            if logo_file:
+                try:
+                    logo = Image.open(logo_file).convert("RGBA")
+                    logo_size = int(size * 0.25)
+                    logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+                    pos_x = (size - logo_size) // 2
+                    pos_y = (size - logo_size) // 2
+                    logo_bg = Image.new('RGBA', (logo_size, logo_size), (255, 255, 255, 255))
+                    img.paste(logo_bg, (pos_x, pos_y))
+                    img.paste(logo, (pos_x, pos_y), logo)
+                except Exception as e:
+                    print(f"Error processing logo: {e}")
+            
+            # Сохранение изображения
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            
+            user_folder = os.path.join(settings.MEDIA_ROOT, request.user.username)
+            if not os.path.exists(user_folder):
+                os.makedirs(user_folder)
+            
+            file_path = os.path.join(user_folder, f"{name}.png")
+            with open(file_path, 'wb') as f:
+                f.write(buffer.getvalue())
+            
+            qr_image_url = os.path.join(settings.MEDIA_URL, request.user.username, f"{name}.png")
+            
+            # Проверка на уникальность имени QR-кода
+            if qr_code.objects.filter(name=name).exists():
+                return render(request, "pro.html", {"error": "QR-код із таким ім'ям вже існує"})
+            
+            # Сохранение QR-кода в базу данных
+            creation_time = timezone.now() + timedelta(hours=2)
+            qr_code_instance = qr_code(
+                name=name,
+                link=link,
+                size=size,
+                shape=1 if round_corners else 0,
+                custom_style="gradient" if use_gradient else "default",
+                data_create=creation_time,
+                expiry_date=(creation_time + timedelta(days=30)).timestamp(),
+                image=qr_image_url
+            )
+            qr_code_instance.save()
+            
+            # Увеличиваем счетчик сгенерированных QR-кодов
+            subscriber.qr_code_count += 1
+            subscriber.save()
+            
+            return render(request, "pro.html", {"qr_image_url": qr_image_url})
+        
+        except Exception as e:
+            print(f"Error generating QR code: {e}")
+            return render(request, "pro.html", {"error": "Помилка при генерації QR-коду"})
+    
+    return render(request, "pro.html")
+
+
+# def delete_qr_code(request, qr_id):
+#     qr = get_object_or_404(qr_code, id=qr_id)
+#     if qr.image:
+#         image_path = os.path.join(settings.MEDIA_ROOT, qr.image.name)
+#         if os.path.isfile(image_path):
+#             os.remove(image_path)
+#     qr.delete()
+#     return redirect('history_generations')
