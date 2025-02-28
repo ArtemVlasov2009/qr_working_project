@@ -123,6 +123,7 @@ h1{
     justify-content: center;
     align-items: flex-start;
     gap: 20px;
+    font-size: 12px;
     margin-top: 40px;
     padding: 20px;
     background-color: #1A202C;
@@ -170,18 +171,16 @@ h1{
 }
 
 .button {
-    width: 235px;
-    height: 55px;
-    border: solid 2px #257AC4;
-    border-radius: 5px;
+    margin: 0 auto;
+    display: block;
+    width: 300px;
+    height: 50px;
+    background-color: transparent;
+    border: 2px solid #257AC4;
     color: #257AC4;
+    font-size: 25px;
+    text-align: center;
+    border-radius: 5px;
     font-weight: bold;
-    text-decoration: none;
-    font-size: 25px; 
-    text-align: center; 
-    line-height: 55px; 
-    display: block; 
-    margin: 0 auto; 
+    cursor: pointer;
 }
-
-

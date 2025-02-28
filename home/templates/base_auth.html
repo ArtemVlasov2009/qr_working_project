@@ -1,0 +1,368 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Головна сторінка{% endblock %}</title>
+    {% block link %}
+    <link rel="stylesheet" href="{% static 'css/base_auth.css' %}">
+    <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000; /* Увеличен для уверенности, что модалка выше всего */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #202831;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #CAD1D4;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .form-group {
+            text-align: center;
+            padding: 30px;
+            color: #CAD1D4;
+            font-size: 20px;
+            margin: 0 auto;
+            margin-top: 20px;
+            max-width: 600px;
+            text-align: left;
+        }
+        #card_number, #expiry_date, #cvv {
+            width: 550px;
+            height: 15px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #ffffff;
+            color: #ffffff;
+            font-size: 20px;
+            outline: none;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-style: italic;
+        }
+        #paymentForm button {
+            margin: 0 auto;
+            display: block;
+            width: 420px;
+            height: 55px;
+            background-color: transparent;
+            border: 2px solid #257AC4;
+            color: #257AC4;
+            font-size: 25px;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #paymentForm button:hover {
+            background-color: rgba(37, 122, 196, 0.1);
+        }
+        ::placeholder {
+            color: #CAD1D4;
+        }
+        #modalTitle {
+            color: #CAD1D4;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .button {
+            margin: 0 auto;
+            display: block;
+            width: 200px;
+            height: 45px;
+            background-color: transparent;
+            border: 2px solid #257AC4;
+            color: #257AC4;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: rgba(37, 122, 196, 0.1);
+        }
+        .button.active {
+            background-color: #257AC4;
+            color: white;
+            border-color: #257AC4;
+        }
+        .plan {
+            transition: box-shadow 0.3s ease;
+        }
+        .plan.active {
+            box-shadow: 0 0 30px rgba(37, 122, 196, 0.8);
+            border-radius: 10px;
+        }
+    </style>
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <header class="header_main">
+        <a class='home_url' href="http://127.0.0.1:8000/home_auth">
+            <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
+        </a>
+        <a style="text-decoration: underline;" href="http://127.0.0.1:8000/home_auth" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+        <a id="generatorLink" href="#" class="{% if request.path == '/generator/' %}current-page{% endif %}">Кодогенерація</a>
+        <a href="{% url 'history_generations' %}" class="{% if request.path == '/history_generations/' %}current-page{% endif %}">Генерації</a>
+        <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>
+        <div class="logout">
+            <a class="logout_кнопка" href="{% url 'logout' %}">Вийти: {{ request.user.username }}</a>
+        </div>
+    </header>
+    <div>
+        <h1>Створюйте власні QR-коди</h1>
+        <p class="Description_text">
+            Створюйте унікальні QR-коди легко та швидко з нашим зручним дизайнерським інтерфейсом! Персоналізуйте їх на свій смак, додаючи стиль та індивідуальність. Скористайтеся безкоштовним тарифним планом і отримайте можливість у будь-який момент повертатися, щоб оновлювати або редагувати свої коди. Простота, творчість і свобода — все це в одному сервісі!
+        </p>
+        <img class="Qr_code_preview_img" src="{% static 'images/Qr_code_preview.png' %}" alt="Qr_code_preview"/>
+        <div class="plans_header">
+            <h1 class="Tarif_Plans">Тарифні плани:</h1>
+            <div class="plans_container">
+                <div class="plan {% if selected_plan == 'free' %}active{% endif %}" id="freePlan">
+                    <h2>Free (Безкоштовно)</h2>
+                    <p>
+                        Можливості:
+                        <ul>
+                            <li>Генерація статичних QR-кодів.</li>
+                            <li>Обмежена кількість QR-кодів (до 1 на місяць).</li>
+                            <li>Вибір базових кольорів і стилів.</li>
+                        </ul>
+                        Ідеально підходить для особистих цілей та невеликих завдань.
+                    </p>
+                    <button type="button" id="freeButton" class="button {% if selected_plan == 'free' %}active{% endif %}">
+                        {% if selected_plan == 'free' %}Обрано{% else %}Оформити{% endif %}
+                    </button>
+                </div>
+                <div class="plan {% if selected_plan == 'standard' %}active{% endif %}" id="standardPlan">
+                    <h2>Standart (10$/місяць)</h2>
+                    <p>
+                        Можливості:
+                        <ul>
+                            <li>Генерація як статичних, так і динамічних QR-кодів.</li>
+                            <li>Обмежена кількість QR-кодів (до 50 на місяць).</li>
+                            <li>Можливість редагування кодів.</li>
+                            <li>Додаткові стилі.</li>
+                        </ul>
+                        Для малого бізнесу та професійного використання.
+                    </p>
+                    <button type="button" id="standardButton" class="button {% if selected_plan == 'standard' %}active{% endif %}">
+                        {% if selected_plan == 'standard' %}Обрано{% else %}Оформити{% endif %}
+                    </button>
+                </div>
+                <div class="plan {% if selected_plan == 'pro' %}active{% endif %}" id="proPlan">
+                    <h2>Pro (50$/місяць)</h2>
+                    <p>
+                        Можливості:
+                        <ul>
+                            <li>Усі функції Pro-плану.</li>
+                            <li>Обмежена кількість QR-кодів (до 100 на місяць).</li>
+                            <li>Мультикористувацький доступ (до 10 користувачів).</li>
+                            <li>Підтримка власного бренду.</li>
+                            <li>Пріоритетна технічна підтримка.</li>
+                        </ul>
+                        Для великих компаній, які шукають гнучкі рішення.
+                    </p>
+                    <button type="button" id="proButton" class="button {% if selected_plan == 'pro' %}active{% endif %}">
+                        {% if selected_plan == 'pro' %}Обрано{% else %}Оформити{% endif %}
+                    </button>
+                </div>
+                <div class="plan {% if selected_plan == 'desktop' %}active{% endif %}" id="desktopPlan">
+                    <h2>Desktop (20$/місяць)</h2>
+                    <p>
+                        Можливості:
+                        <ul>
+                            <li>Генерація статичних і динамічних QR-кодів.</li>
+                            <li>Початкова кількість QR-кодів (до 25 на місяць).</li>
+                            <li>Можливість докупити ячейки для генерації (5$ за 10 додаткових).</li>
+                            <li>Розширені стилі та редагування.</li>
+                            <li>Доступ до історії генерацій.</li>
+                        </ul>
+                        Для користувачів, які хочуть гнучкості в кількості генерацій.
+                    </p>
+                    <button type="button" id="desktopButton" class="button {% if selected_plan == 'desktop' %}active{% endif %}">
+                        {% if selected_plan == 'desktop' %}Обрано{% else %}Оформити{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">×</span>
+                <div class="form-group">
+                    <h2 id="modalTitle">Введіть дані вашої картки</h2>
+                    <form id="paymentForm" method="post">
+                        {% csrf_token %}
+                        <label for="card_number">Номер картки:</label><br>
+                        <input type="text" id="card_number" name="card_number" placeholder="Введіть номер картки (наприклад, 1234 5678 9012 3456)" required><br>
+                        <label for="expiry_date">Термін дії:</label><br>
+                        <input type="text" id="expiry_date" name="expiry_date" placeholder="ММ/РР (наприклад, 12/25)" required><br>
+                        <label for="cvv">CVV:</label><br>
+                        <input type="text" id="cvv" name="cvv" placeholder="Введіть CVV код (наприклад, 123)" required><br>
+                        <input type="hidden" id="selected_plan" name="selected_plan" value="">
+                        <button type="submit">Підтвердити</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Инициализация переменных
+        var modal = document.getElementById("myModal");
+        var selectedPlan = "{{ selected_plan }}";
+
+        // Функции для модального окна
+        function openModal() {
+            console.log("Opening modal"); // Отладка
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            console.log("Closing modal"); // Отладка
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        };
+
+        // Функция обновления активной кнопки
+        function updateActiveButton(plan) {
+            console.log("Updating active button for plan: " + plan); // Отладка
+            document.querySelectorAll('.button').forEach(btn => {
+                btn.classList.remove('active');
+                btn.textContent = 'Оформити';
+            });
+            document.querySelectorAll('.plan').forEach(planDiv => {
+                planDiv.classList.remove('active');
+            });
+
+            if (plan === 'free') {
+                let btn = document.getElementById('freeButton');
+                let planDiv = document.getElementById('freePlan');
+                btn.classList.add('active');
+                btn.textContent = 'Обрано';
+                planDiv.classList.add('active');
+            } else if (plan === 'standard') {
+                let btn = document.getElementById('standardButton');
+                let planDiv = document.getElementById('standardPlan');
+                btn.classList.add('active');
+                btn.textContent = 'Обрано';
+                planDiv.classList.add('active');
+            } else if (plan === 'pro') {
+                let btn = document.getElementById('proButton');
+                let planDiv = document.getElementById('proPlan');
+                btn.classList.add('active');
+                btn.textContent = 'Обрано';
+                planDiv.classList.add('active');
+            } else if (plan === 'desktop') {
+                let btn = document.getElementById('desktopButton');
+                let planDiv = document.getElementById('desktopPlan');
+                btn.classList.add('active');
+                btn.textContent = 'Обрано';
+                planDiv.classList.add('active');
+            }
+        }
+
+        // Привязка событий к кнопкам
+        document.getElementById("freeButton").addEventListener("click", function() {
+            console.log("Free button clicked"); // Отладка
+            document.getElementById("selected_plan").value = 'free';
+            updateActiveButton('free');
+            openModal();
+        });
+
+        document.getElementById("standardButton").addEventListener("click", function() {
+            console.log("Standard button clicked"); // Отладка
+            document.getElementById("selected_plan").value = 'standard';
+            updateActiveButton('standard');
+            openModal();
+        });
+
+        document.getElementById("proButton").addEventListener("click", function() {
+            console.log("Pro button clicked"); // Отладка
+            document.getElementById("selected_plan").value = 'pro';
+            updateActiveButton('pro');
+            openModal();
+        });
+
+        document.getElementById("desktopButton").addEventListener("click", function() {
+            console.log("Desktop button clicked"); // Отладка
+            document.getElementById("selected_plan").value = 'desktop';
+            updateActiveButton('desktop');
+            openModal();
+        });
+
+        // Инициализация активного плана при загрузке
+        if (selectedPlan) {
+            console.log("Initial selected plan: " + selectedPlan); // Отладка
+            updateActiveButton(selectedPlan);
+        }
+
+        // Функции для работы с куки
+        function setCookie(name, value) {
+            document.cookie = name + "=" + value + "; path=/; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+        }
+
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // Установка куки при выборе плана
+        document.querySelectorAll('.button').forEach(button => {
+            button.addEventListener("click", function() {
+                let selectedPlan = this.id.replace("Button", "");
+                console.log("Setting cookie for plan: " + selectedPlan); // Отладка
+                setCookie("selectedPlan", selectedPlan);
+            });
+        });
+
+        // Загрузка сохраненного плана из куки
+        var savedPlan = getCookie("selectedPlan");
+        if (savedPlan) {
+            console.log("Loaded saved plan from cookie: " + savedPlan); // Отладка
+            updateActiveButton(savedPlan);
+        }
+
+        // Обновление ссылки в шапке
+        let generatorLink = document.getElementById("generatorLink");
+        if (savedPlan) {
+            generatorLink.href = `/${savedPlan}/`;
+        }
+    </script>
+    {% endblock %}
+</body>
+</html>

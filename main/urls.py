@@ -33,7 +33,9 @@ urlpatterns = [
     path('standart/', render_standard, name='standart'),
     path('pro/', render_pro, name='pro'),
     path('delete_qr_code/<int:qr_id>/', views.delete_qr_code, name='delete_qr_code'),
-        path('choose_plan/', choose_plan, name='choose_plan'),
+    path('choose_plan/', choose_plan, name='choose_plan'),
+    path('desktop/', render_desktop, name='desktop'),
+    path('home_auth/', render_home_auth, name='home_auth'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

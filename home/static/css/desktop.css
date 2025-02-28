@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    background-color: #202831;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    height: 1250px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.header_main {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background-color: #252D38;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+    flex-direction: row;
+}
+
+.header_main a {
+    color: #CAD1D4;
+    font-size: 22px;
+    text-decoration: none;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.header_main a.current-page {
+    text-decoration: underline;
+}
+
+.Logo_img {
+    width: 100px;
+    height: 100px;
+    background-color: transparent;
+    padding-right: 1200px;
+    padding-top: 9px;
+    padding-left: 20px;
+}
+
+.Generator_frame {
+    width: 1000px;
+    height: 500px;
+    background-color: #252D38;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.Generator_header {
+    text-align: center;
+    color: #CAD1D4;
+    width: 1000px;
+    height: 40px;
+    background-color: #35475D;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    line-height: 40px;
+    margin-top: -20px;
+}
+
+.Generator_internal_frame {
+    width: 425px;
+    height: 410px;
+    border: 1px solid #35475D;
+    border-radius: 5px;
+    margin-left: 40px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    outline: none;
+}
+
+.Generator_internal_frame::-webkit-scrollbar {
+    display: none;
+}
+
+form {
+    color: #CAD1D4;
+    font-size: 15px;
+    width: 425px;
+    text-align: left;
+    margin-left: 40px;
+    height: 410px;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #ffffff;
+    margin-bottom: 20px;
+    color: #CAD1D4;
+    outline: none;
+}
+
+.qr_code_display {
+    width: 350px;
+    height: 350px;
+    background-color: #35475D;
+    border-radius: 5px;
+    position: absolute;
+    margin-left: 630px;
+    margin-top: -400px;
+    right: 40px;
+}
+
+.Buttom_Down {
+    margin-left: 575px;
+    margin-top: -820px;
+    border: 1px solid #CAD1D4;
+    background-color: transparent;
+    font-size: 18px;
+    color: #CAD1D4;
+    border-radius: 5px;
+    width: 173px;
+    height: 35px;
+    position: absolute;
+    z-index: 9999;
+}
+
+.Arrow {
+    margin-left: 460px;
+    position: relative;
+    top: -250px;
+}
+
+.logout {
+    color: #CAD1D4;
+    font-size: 22px;
+    text-decoration: none;
+    font-weight: bold;
+    padding-top: 9px;
+    margin-right: 15px;
+    margin-left: 500px;
+}
+
+.home_url {
+    width: 700px;
+    height: 125px;
+    margin-top: 20px;
+}
+
+.Your_QR {
+    width: 250px;
+    height: 250px;
+    position: fixed;
+    margin-left: 50px;
+    margin-top: 25px;
+}
+
+.qr-code-overlay {
+    position: fixed;
+    top: 180px;
+    left: 75%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    color: #CAD1D4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.qr-image {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.qr-code-overlay img {
+    max-width: 200px;
+    max-height: 200px;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#gradient-colors {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+select {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #CAD1D4;
+    border-radius: 5px;
+    background-color: transparent;
+    color: #CAD1D4;
+    transition: all 0.3s ease;
+}
+
+select:hover {
+    border-color: #007bff;
+    background-color: #252D38;
+}
+
+select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+input[type="color"] {
+    padding: 5px;
+    border: 2px solid #CAD1D4;
+    border-radius: 5px;
+    background-color: transparent;
+    color: #CAD1D4;
+    transition: all 0.3s ease;
+}
+
+input[type="color"]:hover {
+    border-color: #007bff;
+    background-color: #252D38;
+}
+
+input[type="color"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+input[type="file"] {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #CAD1D4;
+    border-radius: 5px;
+    background-color: transparent;
+    color: #CAD1D4;
+    transition: all 0.3s ease;
+}
+
+input[type="file"]::file-selector-button {
+    padding: 5px 10px;
+    border: 2px solid #CAD1D4;
+    border-radius: 5px;
+    background-color: transparent;
+    color: #CAD1D4;
+    transition: all 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    border-color: #007bff;
+    background-color: #252D38;
+}
+
+input[type="file"]::file-selector-button:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+.blocked-text {
+    color: #FF6F61;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    text-align: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #000;
+}
+
+input[type="number"] {
+    width: 100px;
+    padding: 5px;
+    margin: 5px 0;
+    display: flex;
+}
+
+.success {
+    color: #4CAF50;
+    margin: 10px 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.error {
+    color: #FF6F61;
+    margin: 10px 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.qr-status {
+    margin-top: 10px;
+    font-weight: bold;
+    margin-left: 300px;
+}
+
+.Yacheyki{
+    border: 1px solid #CAD1D4;
+    background-color: transparent;
+    font-size: 18px;
+    color: #CAD1D4;
+    border-radius: 5px;
+    width: 100px;
+    height: 30px;
+    margin-bottom: 60px;
+
+}

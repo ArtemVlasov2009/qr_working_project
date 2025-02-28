@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Сторінка генерації</title>
-    <link rel="stylesheet" href="{% static 'css/generator.css' %}">
+    <link rel="stylesheet" href="{% static 'css/standart.css' %}">
     <link rel="icon" href="{% static 'images/Logo.png' %}" type="image/png">
 </head>
 <body>
     <header class="header_main">
-        <a class='home_url' href="{% url 'home' %}">
+        <a class='home_url' href="http://127.0.0.1:8000/home_auth">
             <img class="Logo_img" src="{% static 'images/Logo.png' %}" alt="Logo" />
         </a>
-        <a href="{% url 'home' %}" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
+        <a href="http://127.0.0.1:8000/home_auth" class="{% if request.path == '/' %}current-page{% endif %}">Головна</a>
         <a href="{% url 'generator' %}" class="{% if request.path == '/generator/' %}current-page{% endif %}">Кодогенерація</a>
         <a href="{% url 'history_generations' %}" class="{% if request.path == '/history_generations/' %}current-page{% endif %}">Генерації</a>
         <a href="{% url 'contacts' %}" class="{% if request.path == '/contacts/' %}current-page{% endif %}">Контакти</a>

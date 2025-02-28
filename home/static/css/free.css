@@ -105,7 +105,7 @@ input {
 }
 .Buttom_Down {
     margin-left: 575px;
-    margin-top: -760px; 
+    margin-top: -930px; 
     border: 1px solid #CAD1D4;
     background-color: transparent;
     font-size: 18px;
@@ -202,7 +202,6 @@ input {
     border-radius: 5px;
 }
 
-/* Стили для дроп-меню выбора размера */
 select {
     padding: 10px;
     font-size: 16px;
@@ -224,7 +223,6 @@ select:focus {
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
 
-/* Стили для выбора цвета */
 input[type="color"] {
     padding: 5px;
     border: 2px solid #CAD1D4;
@@ -274,3 +272,4 @@ input[type="file"]::file-selector-button:focus {
     outline: none;
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
+
