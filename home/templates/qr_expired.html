@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Термін дії QR-коду закінчився</title>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ message }}</h1>
+        <p>Термін дії QR-коду закінчився. Натисніть на посилання нижче, щоб повернутися на головну сторінку.</p>
+        <a href="{% url 'home' %}">Повернутися на головну сторінку</a>
+    </div>
+</body>
+</html>

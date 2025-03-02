@@ -174,14 +174,15 @@ h1{
     font-size: 1.5em;
     margin-bottom: 10px;
     text-align: center;
+    font-size: 20px;
 }
 
 .plan p {
     font-size: 0.95em;
     line-height: 1.6;
     text-align: center; 
-    padding: 17px;
-    font-size: 22px;
+    padding: 10px;
+    font-size: 30px;
 }
 
 .button {
@@ -197,4 +198,15 @@ h1{
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
+}
+
+#freeButton{
+    margin-top: 26%;
+}
+#standardButton{
+    margin-top: 20%;
+}
+
+#proButton{
+    margin-top: 13%;
 }

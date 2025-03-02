@@ -36,6 +36,8 @@ urlpatterns = [
     path('choose_plan/', choose_plan, name='choose_plan'),
     path('desktop/', render_desktop, name='desktop'),
     path('home_auth/', render_home_auth, name='home_auth'),
+    path('qr-expired/', views.qr_expired, name='qr_expired'),
+    path('create_code/<int:pk>/', views.render_redirect, name='render_redirect'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -4,13 +4,15 @@ from django.db.utils import IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.conf import settings
-from django.utils import timezone
+from django.utils import timezone  
 from datetime import timedelta
 import qrcode
 from io import BytesIO
 import os
 from PIL import Image, ImageDraw
 from home.models import qr_code, Subscribers
+import datetime
+from django.http import HttpRequest, HttpResponse
 
 def render_home(request):
     selected_plan = request.session.get('selected_plan', None)
@@ -386,7 +388,9 @@ def render_free(request: HttpResponse):
                 custom_style="gradient" if use_gradient else "default",
                 data_create=creation_time,
                 expiry_date=(creation_time + timedelta(days=30)).timestamp(),
-                image=qr_image_url
+                image=qr_image_url,
+                plan_created="free",  
+                user=request.user  
             )
             qr_code_instance.save()
 
@@ -403,18 +407,18 @@ def render_free(request: HttpResponse):
 
 def delete_qr_code(request, qr_id):
     qr = get_object_or_404(qr_code, id=qr_id)
-    if qr.image:
-        image_path = os.path.join(settings.MEDIA_ROOT, qr.image.name)
+    if qr.image:  
+        relative_path = qr.image.replace(settings.MEDIA_URL, '', 1) 
+        image_path = os.path.join(settings.MEDIA_ROOT, relative_path)
         if os.path.isfile(image_path):
             os.remove(image_path)
     qr.delete()
 
     subscriber, created = Subscribers.objects.get_or_create(user=request.user)
-    subscriber.qr_code_count = max(subscriber.qr_code_count - 1, 0) 
+    subscriber.qr_code_count = max(subscriber.qr_code_count - 1, 0)
     subscriber.save()
 
     return redirect('history_generations')
-
         
 
 # Стандартная подписка
@@ -544,7 +548,9 @@ def render_standard(request: HttpResponse):
                 custom_style="gradient" if use_gradient else "default",
                 data_create=creation_time,
                 expiry_date=(creation_time + timedelta(days=30)).timestamp(),
-                image=qr_image_url
+                image=qr_image_url,
+                plan_created="standard",  
+                user=request.user
             )
             qr_code_instance.save()
 
@@ -685,7 +691,9 @@ def render_pro(request: HttpResponse):
                 custom_style="gradient" if use_gradient else "default",
                 data_create=creation_time,
                 expiry_date=(creation_time + timedelta(days=30)).timestamp(),
-                image=qr_image_url
+                image=qr_image_url,
+                plan_created="pro",
+                user=request.user
             )
             qr_code_instance.save()
     
@@ -700,43 +708,29 @@ def render_pro(request: HttpResponse):
     
     return render(request, "pro.html")
 
-
-# def delete_qr_code(request, qr_id):
-#     qr = get_object_or_404(qr_code, id=qr_id)
-#     if qr.image:
-#         image_path = os.path.join(settings.MEDIA_ROOT, qr.image.name)
-#         if os.path.isfile(image_path):
-#             os.remove(image_path)
-#     qr.delete()
-#     return redirect('history_generations')
-
 def render_desktop(request):
     if not request.user.is_authenticated:
         return redirect("authorization")
 
     subscriber, created = Subscribers.objects.get_or_create(user=request.user)
 
-    # Устанавливаем лимит 10 по умолчанию для плана desktop
     if created or subscriber.plan == 'desktop':
         if subscriber.plan != 'desktop':
             subscriber.plan = 'desktop'
-            subscriber.qr_code_limit = 10  # Лимит по умолчанию
+            subscriber.qr_code_limit = 10  
             subscriber.qr_code_count = 0
             subscriber.save()
 
-    # Подсчитываем количество занятых слотов (не пустых QR-кодов)
     used_slots = qr_code.objects.filter(user=request.user).exclude(name__isnull=True).count()
 
-    # Обработка покупки дополнительных слотов
     if request.method == "POST" and request.POST.get("action") == "buy":
         try:
             additional_slots = int(request.POST.get("additional_slots", 0))
             if additional_slots > 0 and additional_slots <= 100:
                 cost = additional_slots * 0.50
-                # Добавляем пустые слоты в базу данных
                 for _ in range(additional_slots):
                     qr_code.objects.create(
-                        user=request.user  # Только пользователь
+                        user=request.user 
                     )
                 subscriber.qr_code_limit += additional_slots
                 subscriber.save()
@@ -758,7 +752,6 @@ def render_desktop(request):
                 "qr_code_limit": subscriber.qr_code_limit
             })
 
-    # Проверка лимита перед генерацией
     if used_slots >= subscriber.qr_code_limit:
         return render(request, "desktop.html", {
             "qr_code_count": used_slots,
@@ -766,7 +759,6 @@ def render_desktop(request):
             "show_limit_modal": True
         })
 
-    # Генерация QR-кода
     if request.method == "POST" and request.POST.get("action") == "generate":
         name = request.POST.get("name")
         link = request.POST.get("link_or_text")
@@ -789,7 +781,6 @@ def render_desktop(request):
             })
 
         try:
-            # Находим первый пустой слот
             qr_slot = qr_code.objects.filter(user=request.user, name__isnull=True).first()
             if not qr_slot and used_slots < subscriber.qr_code_limit:
                 qr_slot = qr_code.objects.create(user=request.user)
@@ -801,7 +792,6 @@ def render_desktop(request):
                     "show_limit_modal": True
                 })
 
-            # Генерация QR-кода
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -812,7 +802,6 @@ def render_desktop(request):
             qr.make(fit=True)
             img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
 
-            # Обработка формы элементов
             if element_shape == "circle":
                 mask = Image.new("L", img.size, 0)
                 draw = ImageDraw.Draw(mask)
@@ -830,7 +819,6 @@ def render_desktop(request):
                         draw.polygon(box, fill=255)
                 img.putalpha(mask)
 
-            # Градиент
             if use_gradient:
                 gradient = Image.new("RGBA", img.size)
                 draw = ImageDraw.Draw(gradient)
@@ -851,7 +839,6 @@ def render_desktop(request):
 
             img = img.resize((size, size), Image.Resampling.LANCZOS)
 
-            # Закругленные углы
             if round_corners:
                 corner_radius = int(size * 0.1)
                 qr_mask = Image.new('L', img.size, 0)
@@ -862,7 +849,6 @@ def render_desktop(request):
                 output.paste(img, mask=qr_mask)
                 img = output
 
-            # Добавление логотипа
             if logo_file:
                 try:
                     logo = Image.open(logo_file).convert("RGBA")
@@ -876,7 +862,6 @@ def render_desktop(request):
                 except Exception as e:
                     print(f"Error processing logo: {e}")
 
-            # Сохранение изображения
             buffer = BytesIO()
             img.save(buffer, format="PNG")
             user_folder = os.path.join(settings.MEDIA_ROOT, request.user.username)
@@ -887,7 +872,6 @@ def render_desktop(request):
                 f.write(buffer.getvalue())
             qr_image_url = os.path.join(settings.MEDIA_URL, request.user.username, f"{name}.png")
 
-            # Проверка на уникальность имени
             if qr_code.objects.filter(user=request.user, name=name).exists():
                 return render(request, "desktop.html", {
                     "qr_code_count": used_slots,
@@ -895,8 +879,8 @@ def render_desktop(request):
                     "error": "QR-код із таким ім'ям уже існує"
                 })
 
-            # Обновляем пустой слот
             creation_time = timezone.now() + timedelta(hours=2)
+            qr_slot.plan_created = "desktop"  
             qr_slot.name = name
             qr_slot.link = link
             qr_slot.size = size
@@ -905,11 +889,12 @@ def render_desktop(request):
             qr_slot.data_create = creation_time
             qr_slot.expiry_date = int((creation_time + timedelta(days=30)).timestamp())
             qr_slot.image = qr_image_url
+            qr_slot.user = request.user
             qr_slot.save()
 
             return render(request, "desktop.html", {
                 "qr_image_url": qr_image_url,
-                "qr_code_count": used_slots + 1,  # Увеличиваем после успеха
+                "qr_code_count": used_slots + 1,
                 "qr_code_limit": subscriber.qr_code_limit
             })
 
@@ -925,3 +910,25 @@ def render_desktop(request):
         "qr_code_count": used_slots,
         "qr_code_limit": subscriber.qr_code_limit
     })
+    
+def render_redirect(request: HttpRequest, pk: int):
+    code = qr_code.objects.filter(id=pk).first()
+    if not code:
+        return HttpResponse("QR-код не найден", status=404)
+
+    current_date = datetime.datetime.now(datetime.timezone.utc)
+    expiry_date = datetime.datetime.fromtimestamp(code.expiry_date, tz=datetime.timezone.utc)
+
+    subscriber, _ = Subscribers.objects.get_or_create(user=code.user)
+    current_plan = subscriber.plan
+
+    premium_plans = ["standard", "pro", "desktop"]
+    if current_plan == "free" and code.plan_created in premium_plans:
+        return redirect("qr_expired")
+
+    if current_date <= expiry_date:
+        return redirect(code.link)
+    else:
+        return redirect("qr_expired")
+def qr_expired(request: HttpRequest):
+    return render(request=request, template_name = 'error.html')

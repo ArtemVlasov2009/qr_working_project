@@ -160,7 +160,7 @@
                     </button>
                 </div>
                 <div class="plan {% if selected_plan == 'standard' %}active{% endif %}" id="standardPlan">
-                    <h2>Standart (10$/місяць)</h2>
+                    <h2>Standart (5$/місяць)</h2>
                     <p>
                         Можливості:
                         <ul>
@@ -176,7 +176,7 @@
                     </button>
                 </div>
                 <div class="plan {% if selected_plan == 'pro' %}active{% endif %}" id="proPlan">
-                    <h2>Pro (50$/місяць)</h2>
+                    <h2>Pro (10$/місяць)</h2>
                     <p>
                         Можливості:
                         <ul>
@@ -193,7 +193,7 @@
                     </button>
                 </div>
                 <div class="plan {% if selected_plan == 'desktop' %}active{% endif %}" id="desktopPlan">
-                    <h2>Desktop (20$/місяць)</h2>
+                    <h2>Desktop (25$/місяць)</h2>
                     <p>
                         Можливості:
                         <ul>
@@ -232,18 +232,17 @@
         </div>
     </div>
     <script>
-        // Инициализация переменных
+
         var modal = document.getElementById("myModal");
         var selectedPlan = "{{ selected_plan }}";
 
-        // Функции для модального окна
         function openModal() {
-            console.log("Opening modal"); // Отладка
+            console.log("Opening modal"); 
             modal.style.display = "block";
         }
 
         function closeModal() {
-            console.log("Closing modal"); // Отладка
+            console.log("Closing modal");
             modal.style.display = "none";
         }
 
@@ -253,9 +252,8 @@
             }
         };
 
-        // Функция обновления активной кнопки
         function updateActiveButton(plan) {
-            console.log("Updating active button for plan: " + plan); // Отладка
+            console.log("Updating active button for plan: " + plan); 
             document.querySelectorAll('.button').forEach(btn => {
                 btn.classList.remove('active');
                 btn.textContent = 'Оформити';
@@ -291,42 +289,38 @@
             }
         }
 
-        // Привязка событий к кнопкам
         document.getElementById("freeButton").addEventListener("click", function() {
-            console.log("Free button clicked"); // Отладка
+            console.log("Free button clicked");
             document.getElementById("selected_plan").value = 'free';
             updateActiveButton('free');
             openModal();
         });
 
         document.getElementById("standardButton").addEventListener("click", function() {
-            console.log("Standard button clicked"); // Отладка
+            console.log("Standard button clicked"); 
             document.getElementById("selected_plan").value = 'standard';
             updateActiveButton('standard');
             openModal();
         });
 
         document.getElementById("proButton").addEventListener("click", function() {
-            console.log("Pro button clicked"); // Отладка
+            console.log("Pro button clicked"); 
             document.getElementById("selected_plan").value = 'pro';
             updateActiveButton('pro');
             openModal();
         });
 
         document.getElementById("desktopButton").addEventListener("click", function() {
-            console.log("Desktop button clicked"); // Отладка
+            console.log("Desktop button clicked"); 
             document.getElementById("selected_plan").value = 'desktop';
             updateActiveButton('desktop');
             openModal();
         });
 
-        // Инициализация активного плана при загрузке
-        if (selectedPlan) {
-            console.log("Initial selected plan: " + selectedPlan); // Отладка
+
+            console.log("Initial selected plan: " + selectedPlan); 
             updateActiveButton(selectedPlan);
         }
-
-        // Функции для работы с куки
         function setCookie(name, value) {
             document.cookie = name + "=" + value + "; path=/; expires=Fri, 31 Dec 9999 23:59:59 GMT";
         }
@@ -341,23 +335,20 @@
             return null;
         }
 
-        // Установка куки при выборе плана
         document.querySelectorAll('.button').forEach(button => {
             button.addEventListener("click", function() {
                 let selectedPlan = this.id.replace("Button", "");
-                console.log("Setting cookie for plan: " + selectedPlan); // Отладка
+                console.log("Setting cookie for plan: " + selectedPlan); 
                 setCookie("selectedPlan", selectedPlan);
             });
         });
 
-        // Загрузка сохраненного плана из куки
         var savedPlan = getCookie("selectedPlan");
         if (savedPlan) {
-            console.log("Loaded saved plan from cookie: " + savedPlan); // Отладка
+            console.log("Loaded saved plan from cookie: " + savedPlan); 
             updateActiveButton(savedPlan);
         }
 
-        // Обновление ссылки в шапке
         let generatorLink = document.getElementById("generatorLink");
         if (savedPlan) {
             generatorLink.href = `/${savedPlan}/`;
