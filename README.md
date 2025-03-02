@@ -1,4 +1,4 @@
-# Інтернет-магазин
+# Генератор QR кодів
 
 ## Список учасників команди:
 - Артем Власов(TEAMLEAD)/Artem Vlasov(TEAMLEAD) - [GitHub](https://github.com/ArtemVlasov2009)
