@@ -12,9 +12,12 @@
 В нашому проекті використовується багато технологій, а саме/Our project uses many technologies, namely:
 Django, GitHub, SQLite3, PIL, HTML, CSS, Javascript
 
-- **Django** - Фреймворк для створення всього проекту
-- **Sqlite3** - Викоритовуємо для праці з sqlite3
-- **Requests** - Використовуємо для роботи з запросами
+-**Django** — фреймворк, який слугує основою для створення всього проєкту;
+-**SQLite3** — використовується для роботи з базою даних SQLite;
+-**Requests** — застосовується для обробки HTTP-запитів;
+-**GitHub** — платформа для управління кодом і спільної розробки;
+-**PIL** — бібліотека для обробки зображень;
+-**HTML, CSS, JavaScript** — базові технології для створення інтерфейсу користувача.
 
 ![alt text](https://github.com/ArtemVlasov2009/qr_working_project/blob/main/FigJam.png "FigJam")
 ---
