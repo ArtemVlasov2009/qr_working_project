@@ -16,7 +16,7 @@ Django, GitHub, SQLite3, PIL, HTML, CSS, Javascript
 - **Sqlite3** - Викоритовуємо для праці з sqlite3
 - **Requests** - Використовуємо для роботи з запросами
 
-![alt text]( "FigJam")
+![alt text](https://github.com/ArtemVlasov2009/qr_working_project/blob/main/FigJam.png "FigJam")
 ---
 #### Щоб запустити наш проект локально на компьютері, треба відкрити проект у IDE, та встановити всі модулі, які вказані вище, та запустити файл manage.py / To run our project locally on your computer, you need to open the project in the IDE, install all the modules listed above, and run the manage.py file
 ---
@@ -29,7 +29,6 @@ Django, GitHub, SQLite3, PIL, HTML, CSS, Javascript
 - **authorization.html** - Це сторінка яка відповідає за авторизацію
 - **free.html**, **standart.html**, **pro.html**, **desktop.html** - Це сторінки які відповідають за генерацію кодів з різною пропискою
 ---
-<iframe src="https://www.figma.com/board/dbMhsxu0FUG3VljMXjDyqo/Untitled?node-id=0-1&t=oxVTlNmMFX7rczgI-1" width="800" height="450" allowfullscreen></iframe>
 --
 Приклад функції рендеру сторінок, наприклад render_home:
 ```python
